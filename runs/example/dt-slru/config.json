@@ -38,5 +38,5 @@
     "log_decisions": false,
     "log_evictions": false,
     "log_episodes": false,
-    "eviction_policy": "dt-slru"
+    "eviction_policy": "DT-SLRU"
 }

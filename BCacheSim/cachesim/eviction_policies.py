@@ -87,6 +87,60 @@ class TTLItem(QueueItemWithStats):
         if self.ttl is not None:
             self.ts_expire = ts.physical + self.ttl
 
+    def calculate_dt_per_byte(self) -> float:
+        """
+        Calculate service time per byte for promotion decision
+        """
+        service_time_saved = self.estimate_service_time()
+
+        # Calculate size in bytes
+        size_bytes = self.get_item_size_bytes()
+
+        # Calculate DT-per-byte score (service time per byte)
+        dt_per_byte = service_time_saved / size_bytes
+
+        return dt_per_byte
+
+    def estimate_service_time(self) -> float:
+        """
+        Estimate service time saved from hits and chunks
+        """
+        # Get hits (including RAM cache hits)
+        hits = self.hits
+        if hasattr(self, "stats") and "ramcache_hits" in self.stats:
+            hits += self.stats["ramcache_hits"]
+
+        # print(dir(item), item.admission_time, item.max_interarrival_time, item.hits, item.episode)
+        # print(dir(item), item.stats)
+
+        chunk_range = self.stats["acc_chunk_range"]
+
+        # Estimate chunks saved
+        # chunks_saved = hits
+        chunks_saved = chunk_range[1] - chunk_range[0]
+
+        return service_time(hits, chunks_saved)
+
+    def get_item_size_bytes(self) -> int:
+        """
+        Get item size in bytes
+        """
+        # Use episode size if available
+        # if hasattr(item.episode, 'num_chunks'):
+        #     return item.episode.num_chunks * 131072  # 128KB per chunk
+
+        # Estimate from key (assume 1 chunk per item)
+        # return 131072  # Default: 1 chunk = 128KB
+        chunk_range = self.stats["acc_chunk_range"]
+
+        # bytes [percentage chunks 4MB (4 * 1024 * 1024)]
+        # size = self.stats['size'] * 4 * 1024 * 1024
+
+        size = self.stats["size"]
+        chunks = chunk_range[1] - chunk_range[0]
+
+        return size * chunks
+
 
 class EvictionImpl(object):
     def keys(self):
@@ -852,6 +906,8 @@ class QueueCache(EvictionPolicy):
         self.lru = lru
         if options.eviction_policy and options.eviction_policy.startswith("ttl"):
             self.cache = TTLPolicy()
+        elif options.eviction_policy and options.eviction_policy == "DT-SLRU":
+            self.cache = DTSLRUPolicy(options.dt_per_byte_score)
         else:
             self.cache = LRUPolicy()
         self.block_counts = Counter()
@@ -887,7 +943,7 @@ class QueueCache(EvictionPolicy):
             self.ttl_predicter = TTLModel(options)
         elif options.eviction_policy == "ttl-opt":
             self.ttl_predicter = TTLOpt()
-        elif not options.eviction_policy.startswith("LRU"):
+        elif not options.eviction_policy.startswith("LRU") and not options.eviction_policy.startswith("DT-SLRU"):
             raise NotImplementedError(options.eviction_policy)
 
         self.on_evict = on_evict
