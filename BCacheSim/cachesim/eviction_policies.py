@@ -6,6 +6,7 @@ import itertools
 import sys
 
 import numpy as np
+
 try:
     import lightgbm as lgb
 except ModuleNotFoundError:
@@ -47,7 +48,7 @@ class QueueItemWithStats(QueueItem):
 
     @property
     def all_hits(self):
-        return self.hits + self.stats.get('ramcache_hits', 0)
+        return self.hits + self.stats.get("ramcache_hits", 0)
 
     def markAccessed(self, ts):
         reuse_dist = ts - self.last_access_time
@@ -110,6 +111,7 @@ class EvictionImpl(object):
 
 class TTLPolicy(EvictionImpl):
     """Evicts item with lowest TTL"""
+
     def __init__(self):
         self.pqueue = pqdict.pqdict()
         self.items = {}
@@ -159,11 +161,118 @@ class LRUPolicy(EvictionImpl):
         return next(iter(self.items))
 
 
+def service_time(ios: int, chunks: int) -> float:
+    """
+    From academic testbed (Orca)
+    """
+    return ios * 11.5e-3 + chunks * 131072 / 1048576 / 143
+
+
+class DTSLRUPolicy(EvictionImpl):
+    """
+    Scheme E1 — DT-SLRU (Segmented LRU with DT-aware promotion):
+        * Two segments (Probation + Protected).
+        * Promote items based on DT-per-byte score or repeated hits. Evict from Probation first.
+    """
+
+    def __init__(self, dt_per_byte_score: float):
+        self.probation_items: OrderedDict[tuple[str, int], TTLItem] = OrderedDict()
+        self.protected_items: OrderedDict[tuple[str, int], TTLItem] = OrderedDict()
+
+        self.dt_per_byte_score: float = dt_per_byte_score
+
+        # DT per byte related tracking
+        self.total_items_tracked: int = 0
+        self.total_dt_per_byte: float = 0.0
+        self.min_dt_per_byte: float = 1.0
+        self.max_dt_per_byte: float = -1.0
+
+    def should_promote(self, item: TTLItem) -> bool:
+        """
+        Determine if item should be promoted to protected segment
+        """
+        # 1: DT-per-byte score-based promotion
+        dt_score = item.calculate_dt_per_byte()
+        if dt_score > self.dt_per_byte_score:
+            return True
+
+        # 2: Repeated hits-based promotion
+        if item.hits >= 2:
+            return True
+
+        return False
+
+    def admit(self, key: tuple[str, int], item: TTLItem):
+        dt_score = item.calculate_dt_per_byte()
+        self.total_dt_per_byte += dt_score
+        self.total_items_tracked += 1
+
+        self.min_dt_per_byte = min(self.min_dt_per_byte, dt_score)
+        self.max_dt_per_byte = max(self.max_dt_per_byte, dt_score)
+
+        self.probation_items[key] = item
+
+    def touch(self, key: tuple[str, int]):
+        # Moves to end. We evict from start.
+        # self.items.move_to_end(key)
+        if key in self.probation_items:
+            item = self.probation_items[key]
+            if self.should_promote(item):
+                self.probation_items.pop(key)
+                self.protected_items[key] = item
+            else:
+                self.probation_items.move_to_end(key)
+        elif key in self.protected_items:
+            self.protected_items.move_to_end(key)
+
+    def evict(
+        self, key: tuple[str, int] | None = None
+    ) -> tuple[tuple[str, int], TTLItem]:
+        # pop in FIFO order, from front
+        if key:
+            # self.items.move_to_end(key, last=False)
+            if key in self.probation_items:
+                self.probation_items.move_to_end(key, last=False)
+                return self.probation_items.popitem(last=False)
+            if key in self.protected_items:
+                self.protected_items.move_to_end(key, last=False)
+                return self.protected_items.popitem(last=False)
+        if len(self.probation_items) != 0:
+            return self.probation_items.popitem(last=False)
+        return self.protected_items.popitem(last=False)
+
+    def victim(self) -> tuple[str, int] | None:
+        if len(self.probation_items) != 0:
+            return next(iter(self.probation_items))
+        if len(self.protected_items) != 0:
+            return next(iter(self.protected_items))
+        return None
+
+    def keys(self) -> list[tuple[str, int]]:
+        return list(self.probation_items.keys()) + list(self.protected_items.keys())
+
+    def values(self) -> list[TTLItem]:
+        return list(self.probation_items.values()) + list(self.protected_items.values())
+
+    def __len__(self) -> int:
+        return len(self.probation_items) + len(self.protected_items)
+
+    def __getitem__(self, key: tuple[str, int]) -> TTLItem:
+        if key in self.probation_items:
+            return self.probation_items[key]
+        if key in self.protected_items:
+            return self.protected_items[key]
+        raise KeyError(key)
+
+    def __contains__(self, key: tuple[str, int]) -> bool:
+        return key in self.probation_items or key in self.protected_items
+
+
 class TTLModel(object):
     def __init__(self, options):
         model_path = options.ttl_model_path
-        self.models = {'ttl': lgb.Booster(model_file=model_path)}
-        self.keys = ['ttl']
+        self.models = {"ttl": lgb.Booster(model_file=model_path)}
+        self.keys = ["ttl"]
 
     def predict(self, features):
         # print(features[0].shape)
@@ -177,17 +286,22 @@ class TTLModel(object):
 class TTLOpt(object):
     def predict(self, features, metadata=None):
         # use episodes.max_interarrival
-        return metadata['episode'].max_interarrival[0]
+        return metadata["episode"].max_interarrival[0]
 
 
 class EvictionPolicy(object):
-    def __init__(self, evictions_log, cache_size, *,
-                 evict_by='chunk',
-                 namespace='flashcache',
-                 dynamic_features=None,
-                 prefetch_range='episode',
-                 prefetch_when='never',
-                 options=None):
+    def __init__(
+        self,
+        evictions_log,
+        cache_size,
+        *,
+        evict_by="chunk",
+        namespace="flashcache",
+        dynamic_features=None,
+        prefetch_range="episode",
+        prefetch_when="never",
+        options=None,
+    ):
         self.cache_size = cache_size
         self.keys_written = 0
         self.rejections = 0
@@ -200,12 +314,21 @@ class EvictionPolicy(object):
         # dynamic features, which have to be update on each request
         self.dynamic_features = dynamic_features
         self.evictions_log = evictions_log
-        header = ["block_id", "admission_time", "ts", "last_access_time",
-                  "hits", "useful_time", "time_in_system",
-                  "time_since_last_access", "max_interarrival_time",
-                  "num_chunks", "chunks"]
+        header = [
+            "block_id",
+            "admission_time",
+            "ts",
+            "last_access_time",
+            "hits",
+            "useful_time",
+            "time_in_system",
+            "time_since_last_access",
+            "max_interarrival_time",
+            "num_chunks",
+            "chunks",
+        ]
         if evictions_log:
-            evictions_log.write(",".join(header)+"\n")
+            evictions_log.write(",".join(header) + "\n")
         self.eviction_buffer = {}
         self.prefetches = 0
         self.prefetches_failed_firstaccess = 0
@@ -228,7 +351,7 @@ class EvictionPolicy(object):
         ods.bump([self.namespace, k], **kwargs)
         tags = sorted(tags)
         for r in range(len(tags)):
-            for comb in itertools.combinations(tags, r+1):
+            for comb in itertools.combinations(tags, r + 1):
                 k_all = k + "_" + "_".join(comb)
                 ods.bump([self.namespace, k_all], **kwargs)
 
@@ -252,10 +375,20 @@ class EvictionPolicy(object):
         time_since_last_access = ts - item.last_access_time
         self.eviction_age_cum += time_since_last_access
         self.bump("eviction_age_cum", v=time_since_last_access, init=Timestamp(0, 0))
-        self.bump_counter("eviction_age_dist", int(round(time_since_last_access.physical / 60)))
-        self.bump_counter("eviction_age_dist_logical", int(round(time_since_last_access.logical / 500))*500)
-        self.bump_counter("time_in_system_dist", int(round(time_in_system.physical / 60)))
-        self.bump_counter("time_in_system_dist_logical", int(round(time_in_system.logical / 1000))*1000)
+        self.bump_counter(
+            "eviction_age_dist", int(round(time_since_last_access.physical / 60))
+        )
+        self.bump_counter(
+            "eviction_age_dist_logical",
+            int(round(time_since_last_access.logical / 500)) * 500,
+        )
+        self.bump_counter(
+            "time_in_system_dist", int(round(time_in_system.physical / 60))
+        )
+        self.bump_counter(
+            "time_in_system_dist_logical",
+            int(round(time_in_system.logical / 1000)) * 1000,
+        )
         self.bump_counter("hits_on_eviction", item.hits)
         self.bump("total_time_in_system", v=time_in_system, init=Timestamp(0, 0))
         block_id, chunk_id = item.key
@@ -263,9 +396,16 @@ class EvictionPolicy(object):
             self.un_accessed_evictions += 1
             self.bump("unaccessed_evictions")
             self.un_accessed_eviction_age_cum += time_since_last_access
-            self.bump("unaccessed_eviction_age_cum", v=time_since_last_access, init=Timestamp(0, 0))
+            self.bump(
+                "unaccessed_eviction_age_cum",
+                v=time_since_last_access,
+                init=Timestamp(0, 0),
+            )
 
-            if item.stats.get('prefetch', False) and item.stats.get('ramcache_hits', 0) == 0:
+            if (
+                item.stats.get("prefetch", False)
+                and item.stats.get("ramcache_hits", 0) == 0
+            ):
                 self.bump("evicted_nohits_prefetch")
             # TODO: log
 
@@ -275,9 +415,9 @@ class EvictionPolicy(object):
                 extra_tags.append("nohitsatall")
             elif item.hits == 0:
                 extra_tags.append("nohits")
-            if item.stats.get('prefetch', False):
+            if item.stats.get("prefetch", False):
                 extra_tags.append("prefetch")
-            if item.stats.get('doomed', False):
+            if item.stats.get("doomed", False):
                 self.bump("evicted_doomed", tags=extra_tags)
                 if item.hits != 0:
                     self.bump("evicted_doomed_withhits")
@@ -290,7 +430,10 @@ class EvictionPolicy(object):
                 if chunk_id not in episode.chunk_last_seen:
                     self.bump("evicted_chunknotinepisode", tags=extra_tags)
                 else:
-                    if item.last_access_time.physical > episode.chunk_last_seen[chunk_id][0]:
+                    if (
+                        item.last_access_time.physical
+                        > episode.chunk_last_seen[chunk_id][0]
+                    ):
                         if item.hits > 0:
                             extra_tags.append("hitsAfterEp")
                         else:
@@ -314,12 +457,24 @@ class EvictionPolicy(object):
                 if item.ts_access is None:
                     self.bump("warning_evicted_episodenotfound_notsaccess")
 
-            self.bump_counter("max_interarrival_time_dist_mins", int(round(item.max_interarrival_time.physical / 60)))
-            self.bump_counter("max_interarrival_time_dist_logical", int(round(item.max_interarrival_time.logical / 500))*500)
+            self.bump_counter(
+                "max_interarrival_time_dist_mins",
+                int(round(item.max_interarrival_time.physical / 60)),
+            )
+            self.bump_counter(
+                "max_interarrival_time_dist_logical",
+                int(round(item.max_interarrival_time.logical / 500)) * 500,
+            )
 
         self.max_interarrival_time_cum += item.max_interarrival_time
-        self.bump("max_interarrival_time_cum", v=item.max_interarrival_time, init=Timestamp(0, 0))
-        self.max_max_interarrival_time = max(self.max_max_interarrival_time, item.max_interarrival_time)
+        self.bump(
+            "max_interarrival_time_cum",
+            v=item.max_interarrival_time,
+            init=Timestamp(0, 0),
+        )
+        self.max_max_interarrival_time = max(
+            self.max_max_interarrival_time, item.max_interarrival_time
+        )
 
     def on_before_access(self, block_id, access, ts):
         pass
@@ -341,7 +496,7 @@ class EvictionPolicy(object):
         # TODO: If scheduled for early eviction, do not admit.
 
         # Avoid readmissions during episodes
-        if self.evict_by == 'episode':
+        if self.evict_by == "episode":
             for block_id, acc in groups:
                 for chunk_id in acc.chunks():
                     k = (block_id, chunk_id)
@@ -351,10 +506,15 @@ class EvictionPolicy(object):
 
     def prefetch_admit_buffer(self, ts, access=None):
         # Prefetch
-        if self.episodes and self.prefetch_when != 'never' and not self.prefetch_range.startswith('chunk') and not self.prefetch_range.startswith('acctime'):
+        if (
+            self.episodes
+            and self.prefetch_when != "never"
+            and not self.prefetch_range.startswith("chunk")
+            and not self.prefetch_range.startswith("acctime")
+        ):
             # Obsolete.
             for block_id, items in self.admitted_buffer.items():
-                if self.prefetch_when == 'rejectfirst':
+                if self.prefetch_when == "rejectfirst":
                     eps_stats = self.cached_episodes[block_id]
                     if eps_stats["iops_misses"] == 0:
                         # TODO: assert not in block IDs
@@ -378,12 +538,16 @@ class EvictionPolicy(object):
                     LOG_DEBUG(block_id, items)
                     print(len(items))
                     ts_inserted = items[0][1]
-                    raise Exception(f'Error: Episode not found: Block: {block_id}, TS: {ts_inserted}')
-                if self.prefetch_when == 'always_debug':
+                    raise Exception(
+                        f"Error: Episode not found: Block: {block_id}, TS: {ts_inserted}"
+                    )
+                if self.prefetch_when == "always_debug":
                     t1, t2 = [], []
                     # self.admit_history_debug += episodes
                     for episode in episodes:
-                        t1.append([block_id, episode.offset[0], episode.size, ts.physical])
+                        t1.append(
+                            [block_id, episode.offset[0], episode.size, ts.physical]
+                        )
                         # print('>', block_id, episode.offset[0], episode.size, ts.physical)
                     if ts.physical not in self.prefetch:
                         # print("Readmission:", block_id, ts)
@@ -395,32 +559,38 @@ class EvictionPolicy(object):
                             t2.append([block_id] + list(access_args))
                         if sorted(t1) != sorted(t2):
                             print(ts, unique_ts)
-                            print('<<')
+                            print("<<")
                             print(t1)
-                            print('>>')
+                            print(">>")
                             print(t2)
 
                 if len(episodes) > 1:
-                    self.bump_counter("multiple_episodes_in_admit_buffer", len(episodes))
+                    self.bump_counter(
+                        "multiple_episodes_in_admit_buffer", len(episodes)
+                    )
 
-                if self.prefetch_range == 'accend-chunk':
+                if self.prefetch_range == "accend-chunk":
                     for acc_ts in unique_ts:
-                        episode_chunks = _get_chunks_for_episode(self.episodes, block_id, acc_ts)
+                        episode_chunks = _get_chunks_for_episode(
+                            self.episodes, block_id, acc_ts
+                        )
                         chks = []
                         for chunk_id in episode_chunks:
                             k = (block_id, chunk_id)
                             if k not in self.cache and self.ap.accept(k, acc_ts):
                                 chks.append(chunk_id)
                         self._admit_prefetch(chks, block_id, ts, access)
-                elif self.prefetch_range == 'episode-predict':
+                elif self.prefetch_range == "episode-predict":
                     fx = set()
                     for chunk_id, ts_inserted, features in items:
-                        if len(features) == 6+5:
+                        if len(features) == 6 + 5:
                             features = features[6:]
                         fx.add(tuple(features))
                     fx = list(fx)
                     if len(fx) > 1:
-                        self.bump_counter("warning_multiple_features_in_admit_buffer", len(fx))
+                        self.bump_counter(
+                            "warning_multiple_features_in_admit_buffer", len(fx)
+                        )
                     elif len(fx) == 0:
                         continue
                     try:
@@ -431,27 +601,50 @@ class EvictionPolicy(object):
                         print(items)
                         raise
                     if chks:
-                        self.bump_counter("loss_prefetch_start", stats["chunk_r"][0] - episodes[0].chunk_range[0])
-                        self.bump_counter("loss_prefetch_end", stats["chunk_r"][1] - episodes[0].chunk_range[1])
+                        self.bump_counter(
+                            "loss_prefetch_start",
+                            stats["chunk_r"][0] - episodes[0].chunk_range[0],
+                        )
+                        self.bump_counter(
+                            "loss_prefetch_end",
+                            stats["chunk_r"][1] - episodes[0].chunk_range[1],
+                        )
                         self._admit_prefetch(chks, block_id, ts, access)
                     # collect stats on how much it differs from actual episode
                 else:
                     for episode in episodes:
-                        if self.prefetch_range == 'episode':
-                            access = utils.BlkAccess(episode.offset[0], episode.size, ts.physical, block=episode.key)
+                        if self.prefetch_range == "episode":
+                            access = utils.BlkAccess(
+                                episode.offset[0],
+                                episode.size,
+                                ts.physical,
+                                block=episode.key,
+                            )
                             assert episode.offset[0] >= 0
                             chks = access.chunks()
                             # assert episode.size <= utils.BlkAccess.MAX_BLOCK_SIZE
-                        elif self.prefetch_range == 'all':
-                            access = utils.BlkAccess(0, max(episode.size, utils.BlkAccess.MAX_BLOCK_SIZE), ts.physical, block=episode.key)
+                        elif self.prefetch_range == "all":
+                            access = utils.BlkAccess(
+                                0,
+                                max(episode.size, utils.BlkAccess.MAX_BLOCK_SIZE),
+                                ts.physical,
+                                block=episode.key,
+                            )
                             chks = access.chunks()
-                        elif self.prefetch_range.startswith('threshold-'):
-                            prefetch_chk_threshold = int(self.prefetch_range.replace('threshold-', ''))
-                            chks = [chk for chk, cnt in episode.chunk_counts.items()
-                                    if cnt >= prefetch_chk_threshold]
+                        elif self.prefetch_range.startswith("threshold-"):
+                            prefetch_chk_threshold = int(
+                                self.prefetch_range.replace("threshold-", "")
+                            )
+                            chks = [
+                                chk
+                                for chk, cnt in episode.chunk_counts.items()
+                                if cnt >= prefetch_chk_threshold
+                            ]
 
                         else:
-                            raise NotImplementedError(f"Unknown prefetch_range option: {self.prefetch_range}")
+                            raise NotImplementedError(
+                                f"Unknown prefetch_range option: {self.prefetch_range}"
+                            )
 
                         self._admit_prefetch(chks, block_id, ts, access)
         self.admit_history_debug = dict(self.admitted_buffer)
@@ -478,15 +671,24 @@ class EvictionPolicy(object):
         return utils.safe_div(self.eviction_age_cum, self.evictions)
 
     def computeNoHitEvictionAge(self):
-        return utils.safe_div(self.un_accessed_eviction_age_cum, self.un_accessed_evictions)
+        return utils.safe_div(
+            self.un_accessed_eviction_age_cum, self.un_accessed_evictions
+        )
 
     def computeMaxMaxInterarrivalTime(self):
-        return max(max((item.max_interarrival_time for item in self.cache.values()),
-                       default=Timestamp(0, 0)), self.max_max_interarrival_time)
+        return max(
+            max(
+                (item.max_interarrival_time for item in self.cache.values()),
+                default=Timestamp(0, 0),
+            ),
+            self.max_max_interarrival_time,
+        )
 
     def computeAvgMaxInterarrivalTime(self):
-        num = self.max_interarrival_time_cum + sum((item.max_interarrival_time for item in self.cache.values()),
-                                                   start=Timestamp(0, 0))
+        num = self.max_interarrival_time_cum + sum(
+            (item.max_interarrival_time for item in self.cache.values()),
+            start=Timestamp(0, 0),
+        )
         den = len(self.cache) + self.evictions
         return utils.safe_div(num, den)
 
@@ -627,22 +829,28 @@ class LIRSCache(EvictionPolicy):
 
 
 class QueueCache(EvictionPolicy):
-    def __init__(self, evictions_log, num_elems, ap, *,
-                 lru=True,
-                 offline_feat_df=None,
-                 episodes=None,
-                 batch_size=1,
-                 prefetcher=None,
-                 on_evict=None,
-                 keep_metadata=False,
-                 options=None,
-                 **kwargs):
+    def __init__(
+        self,
+        evictions_log,
+        num_elems,
+        ap,
+        *,
+        lru=True,
+        offline_feat_df=None,
+        episodes=None,
+        batch_size=1,
+        prefetcher=None,
+        on_evict=None,
+        keep_metadata=False,
+        options=None,
+        **kwargs,
+    ):
         super().__init__(evictions_log, num_elems, options=options, **kwargs)
         early_evict = options.early_evict
         prefetch = options.prefetch
 
         self.lru = lru
-        if options.eviction_policy and options.eviction_policy.startswith('ttl'):
+        if options.eviction_policy and options.eviction_policy.startswith("ttl"):
             self.cache = TTLPolicy()
         else:
             self.cache = LRUPolicy()
@@ -675,11 +883,11 @@ class QueueCache(EvictionPolicy):
 
         self.ttl_predicter = None
 
-        if options.eviction_policy == 'ttl-ml':
+        if options.eviction_policy == "ttl-ml":
             self.ttl_predicter = TTLModel(options)
-        elif options.eviction_policy == 'ttl-opt':
+        elif options.eviction_policy == "ttl-opt":
             self.ttl_predicter = TTLOpt()
-        elif not options.eviction_policy.startswith('LRU'):
+        elif not options.eviction_policy.startswith("LRU"):
             raise NotImplementedError(options.eviction_policy)
 
         self.on_evict = on_evict
@@ -692,79 +900,79 @@ class QueueCache(EvictionPolicy):
         block_id, chunk_id = key
         if block_id not in self.cached_episodes:
             self.cached_episodes[block_id] = {
-                'block_id': block_id,
-                'first_access_ts': ts,
-                'last_access_ts': ts,
-                'admitted_ts': Counter(),
-                'rejected_ts': Counter(),
-                'evicted': None,
-                'chunks': set(),
-                'active_chunks': set(),
-                'admitbuffer_chunks': set(),
-                'num_accesses': 0,
-                'iops_hits': 0,
-                'iops_partial_hits': 0,
-                'iops_misses': 0,
-                'ts_hits': [],
-                'ts_misses': [],
-                'admits_by_chunk': Counter(),
+                "block_id": block_id,
+                "first_access_ts": ts,
+                "last_access_ts": ts,
+                "admitted_ts": Counter(),
+                "rejected_ts": Counter(),
+                "evicted": None,
+                "chunks": set(),
+                "active_chunks": set(),
+                "admitbuffer_chunks": set(),
+                "num_accesses": 0,
+                "iops_hits": 0,
+                "iops_partial_hits": 0,
+                "iops_misses": 0,
+                "ts_hits": [],
+                "ts_misses": [],
+                "admits_by_chunk": Counter(),
             }
         eps_stats = self.cached_episodes[block_id]
-        eps_stats['last_access_ts'] = ts
-        eps_stats['chunks'].add(chunk_id)
+        eps_stats["last_access_ts"] = ts
+        eps_stats["chunks"].add(chunk_id)
         if admit_buffer:
-            eps_stats['admitbuffer_chunks'].add(chunk_id)
+            eps_stats["admitbuffer_chunks"].add(chunk_id)
         else:
-            if len(eps_stats['active_chunks']) == 0:
+            if len(eps_stats["active_chunks"]) == 0:
                 self.bump("episodes_admitted")
-            eps_stats['active_chunks'].add(chunk_id)
-            eps_stats['admits_by_chunk'][chunk_id] += 1
+            eps_stats["active_chunks"].add(chunk_id)
+            eps_stats["admits_by_chunk"][chunk_id] += 1
 
     def admit_episode(self, key, ts):
         if "--fast" in sys.argv:
             return
         block_id, chunk_id = key
         eps_stats = self.cached_episodes[block_id]
-        eps_stats['admitted_ts'][ts] += 1
-        eps_stats['admits_by_chunk'][chunk_id] += 1
+        eps_stats["admitted_ts"][ts] += 1
+        eps_stats["admits_by_chunk"][chunk_id] += 1
         try:
-            eps_stats['admitbuffer_chunks'].remove(chunk_id)
+            eps_stats["admitbuffer_chunks"].remove(chunk_id)
         except KeyError:
             # print(key, ts)
             # print(eps_stats)
             # raise
             pass
-        eps_stats['active_chunks'].add(chunk_id)
+        eps_stats["active_chunks"].add(chunk_id)
 
     def dec_episode(self, key, ts, *, admit_buffer=False):
         if "--fast" in sys.argv:
             return
         block_id, chunk_id = key
         eps_stats = self.cached_episodes[block_id]
-        if chunk_id not in eps_stats['chunks']:
+        if chunk_id not in eps_stats["chunks"]:
             print(key)
             # print(eps_stats)
         try:
             if admit_buffer:
-                eps_stats['rejected_ts'][ts] += 1
-                eps_stats['admitbuffer_chunks'].remove(chunk_id)
+                eps_stats["rejected_ts"][ts] += 1
+                eps_stats["admitbuffer_chunks"].remove(chunk_id)
             else:
-                eps_stats['active_chunks'].remove(chunk_id)
+                eps_stats["active_chunks"].remove(chunk_id)
         except KeyError:
             pass
             # print(f"Error: couldn't find chunk {chunk_id}")
             # raise
-        if len(eps_stats['active_chunks']) == 0:
-            eps_stats['evicted'] = ts
+        if len(eps_stats["active_chunks"]) == 0:
+            eps_stats["evicted"] = ts
             # TODO: log eps_stats
-            if len(eps_stats['admitbuffer_chunks']) == 0:
-                a_ts = set(eps_stats['admitted_ts'].keys())
-                r_ts = set(eps_stats['rejected_ts'].keys())
+            if len(eps_stats["admitbuffer_chunks"]) == 0:
+                a_ts = set(eps_stats["admitted_ts"].keys())
+                r_ts = set(eps_stats["rejected_ts"].keys())
                 eps_stats["partial_admits"] = len(a_ts & r_ts)
                 if eps_stats["partial_admits"] > 0:
                     self.bump("warning_admits_partial", v=eps_stats["partial_admits"])
                     self.bump("warning_admits_partial_episodes")
-                for chunk_id, times_admitted in eps_stats['admits_by_chunk'].items():
+                for chunk_id, times_admitted in eps_stats["admits_by_chunk"].items():
                     self.bump_counter("chunk_admits_in_epsiode_dist", times_admitted)
                 # logger.dump("episodes", eps_stats)
                 del self.cached_episodes[block_id]
@@ -818,16 +1026,16 @@ class QueueCache(EvictionPolicy):
         else:
             if key in self.cache:
                 metadata = self.cache[key].stats
-                for k, v in kwargs['metadata'].items():
-                    if k.startswith('ramcache_'):
-                        if k.endswith('_time'):
+                for k, v in kwargs["metadata"].items():
+                    if k.startswith("ramcache_"):
+                        if k.endswith("_time"):
                             metadata[k] = v
                         else:
                             metadata[k] = metadata.get(k, 0) + v
             else:
                 assert key in self.admit_buffer
-                for k, v in kwargs['metadata'].items():
-                    if k.startswith('ramcache_'):
+                for k, v in kwargs["metadata"].items():
+                    if k.startswith("ramcache_"):
                         self.admit_buffer_metadata[k][key] = v
                 # Corner case: if two RAM evictions happen during admit buffer time, some hits will not be recorded in Flash Stats.
             ods.bump("ram_eviction_already_in_flash")
@@ -844,8 +1052,8 @@ class QueueCache(EvictionPolicy):
         # record features
         self.admit_buffer[key] = keyfeaturelist
 
-        if 'ts' not in metadata:
-            metadata['ts'] = ts
+        if "ts" not in metadata:
+            metadata["ts"] = ts
         for k in metadata:
             self.admit_buffer_metadata[k][key] = metadata[k]
 
@@ -863,35 +1071,39 @@ class QueueCache(EvictionPolicy):
         # process batch admission
         if not self.admit_buffer:
             return
-        decisions = self.ap.batchAccept(self.admit_buffer, ts, metadata={**{'victim': self.cache.victim()}, **self.admit_buffer_metadata})
+        decisions = self.ap.batchAccept(
+            self.admit_buffer,
+            ts,
+            metadata={**{"victim": self.cache.victim()}, **self.admit_buffer_metadata},
+        )
         for nkey, dec in decisions.items():
             self.bump("ap.called")
-            if self.admit_buffer_metadata['ramcache_hits'].get(nkey, 0) > 0:
+            if self.admit_buffer_metadata["ramcache_hits"].get(nkey, 0) > 0:
                 self.bump(["ap.called", "ram_hits"])
             if not dec:
                 self.rejections += 1
                 self.bump("rejections")
                 # Log episode rejections
                 self.dec_episode(nkey, ts, admit_buffer=True)
-                if nkey in self.admit_buffer_metadata['ramcache_hits']:
-                    if self.admit_buffer_metadata['ramcache_hits'][nkey] == 0:
+                if nkey in self.admit_buffer_metadata["ramcache_hits"]:
+                    if self.admit_buffer_metadata["ramcache_hits"][nkey] == 0:
                         self.bump("rejections_no_hit_in_ram")
-                        if self.admit_buffer_metadata['prefetch'].get(nkey, False):
+                        if self.admit_buffer_metadata["prefetch"].get(nkey, False):
                             self.bump("rejections_no_hit_in_ram_prefetches")
 
                 if self.keep_metadata:
                     del self.insert_metadata[nkey]
             else:
                 # ts_access = self.admit_buffer_inserted[nkey]
-                ts_access = self.admit_buffer_metadata['ts'][nkey]
+                ts_access = self.admit_buffer_metadata["ts"][nkey]
                 item_kwargs = {}
                 for k, dct in self.admit_buffer_metadata.items():
-                    if nkey in dct and k != 'ts':
+                    if nkey in dct and k != "ts":
                         item_kwargs[k] = dct[nkey]
-                if self.admit_buffer_metadata['prefetch'].get(nkey, False):
+                if self.admit_buffer_metadata["prefetch"].get(nkey, False):
                     self.bump("prefetches")
                     self.prefetches += 1
-                    if item_kwargs.get('at_ep_start', False):
+                    if item_kwargs.get("at_ep_start", False):
                         self.bump("prefetches_at_ep_start")
                     else:
                         self.bump("prefetches_after_ep_start")
@@ -903,8 +1115,14 @@ class QueueCache(EvictionPolicy):
                     # TODO: OPT-TTL
                     # print(len(self.admit_buffer_metadata))
                     # print(self.admit_buffer_metadata)
-                    metadata_ = {k: v[nkey] for k, v in self.admit_buffer_metadata.items() if nkey in v}
-                    ttl = self.ttl_predicter.predict(self.admit_buffer[nkey], metadata=metadata_)
+                    metadata_ = {
+                        k: v[nkey]
+                        for k, v in self.admit_buffer_metadata.items()
+                        if nkey in v
+                    }
+                    ttl = self.ttl_predicter.predict(
+                        self.admit_buffer[nkey], metadata=metadata_
+                    )
                     # print(ttl)
                     self.bump("total_ttl", v=int(ttl))
                     # assert ttl is not None
@@ -914,7 +1132,9 @@ class QueueCache(EvictionPolicy):
                 self.admit(nkey, ts, ts_access=ts_access, ttl=ttl, **item_kwargs)
                 # Queue for prefetching
                 block_id, chunk_id = nkey
-                self.admitted_buffer[block_id].append((chunk_id, ts_access, self.admit_buffer[nkey]))
+                self.admitted_buffer[block_id].append(
+                    (chunk_id, ts_access, self.admit_buffer[nkey])
+                )
         self.admit_buffer.clear()
         self.admit_buffer_blocks.clear()
         self.admit_buffer_metadata.clear()
@@ -937,7 +1157,7 @@ class QueueCache(EvictionPolicy):
                     # Only count readmissions on the first time.
                     self.bump("readmission_from_ep_io")
                 episode.s["sim_admitted_ts"].add(ts_inserted)
-                if item_kwargs.get('at_ep_start', False):
+                if item_kwargs.get("at_ep_start", False):
                     self.bump("admits_at_ep_start_ios")
                 else:
                     # Could have been prefetches/admitted earlier, i.e., Late/Readmits.
@@ -948,13 +1168,24 @@ class QueueCache(EvictionPolicy):
                 # TODO: Figure out why with fractional prefetching, this is not set.
                 if not episode.s.get("sim_admitted", False):
                     episode.s["sim_admitted"] = True
-                    self.bump("service_time_saved__prefetch_from_episode", v=episode.s_export["service_time_saved__prefetch"])
-                    self.bump("service_time_saved__noprefetch_from_episode", v=episode.s_export["service_time_saved__noprefetch"])
+                    self.bump(
+                        "service_time_saved__prefetch_from_episode",
+                        v=episode.s_export["service_time_saved__prefetch"],
+                    )
+                    self.bump(
+                        "service_time_saved__noprefetch_from_episode",
+                        v=episode.s_export["service_time_saved__noprefetch"],
+                    )
                     # Ideally, hits__prefetch
                     self.bump("hits__prefetch_from_episode", v=episode.num_accesses - 1)
-                    self.bump("service_time_saved_pf_from_episode", v=episode.s_export["prefetch_st_benefit"])
+                    self.bump(
+                        "service_time_saved_pf_from_episode",
+                        v=episode.s_export["prefetch_st_benefit"],
+                    )
                     if episode.chunk_counts:
-                        self.bump("admitted_chunks_from_analysis", v=len(episode.chunk_counts))
+                        self.bump(
+                            "admitted_chunks_from_analysis", v=len(episode.chunk_counts)
+                        )
                     else:
                         self.bump("admitted_chunks_from_analysis", v=episode.num_chunks)
 
@@ -963,14 +1194,17 @@ class QueueCache(EvictionPolicy):
                 self.bump_counter("admitted_eps_score", round(episode.score, 7))
                 self.bump_counter("admitted_eps_size", episode.num_chunks)
                 self.bump_counter("admitted_eps_threshold", round(episode.threshold))
-                self.bump_counter("admitted_after_eps_start", round(ts_inserted.physical - episode.ts_physical[0]))
+                self.bump_counter(
+                    "admitted_after_eps_start",
+                    round(ts_inserted.physical - episode.ts_physical[0]),
+                )
                 if episode.chunk_last_seen:
                     tags = []
-                    if item_kwargs.get('prefetch', False):
+                    if item_kwargs.get("prefetch", False):
                         tags.append("prefetch")
                     if "--fast" not in sys.argv:
                         eps_stats = self.cached_episodes[block_id]
-                        if eps_stats['admits_by_chunk'][chunk_id] > 1:
+                        if eps_stats["admits_by_chunk"][chunk_id] > 1:
                             tags.append("readmission")
                     if readmission_from_ep:
                         tags.append("readmissionEp")
@@ -988,10 +1222,13 @@ class QueueCache(EvictionPolicy):
                         if ts_inserted.physical == episode.chunk_last_seen[chunk_id][0]:
                             tags.append("onlastseen")
                         self.bump("admitted_doomed", tags=tags)
-                        item_kwargs['doomed'] = True
-                        self.bump_counter('admitted_without_hits_remaining_hits_dist', episode.chunk_counts[chunk_id])
+                        item_kwargs["doomed"] = True
+                        self.bump_counter(
+                            "admitted_without_hits_remaining_hits_dist",
+                            episode.chunk_counts[chunk_id],
+                        )
                 else:
-                    item_kwargs['doomed'] = False
+                    item_kwargs["doomed"] = False
 
                 rounded = ts_inserted.logical - episode.ts_logical[0]
                 if rounded > 100:
@@ -1005,27 +1242,32 @@ class QueueCache(EvictionPolicy):
                 self.bump("warning_admitted_eps_unknown")
 
             tags = []
-            if item_kwargs.get('promotion', 0) > 0:
+            if item_kwargs.get("promotion", 0) > 0:
                 tags.append("prefetch")
-            if item_kwargs.get('prefetch', False):
+            if item_kwargs.get("prefetch", False):
                 tags.append("prefetch")
 
             if "--fast" not in sys.argv:
                 eps_stats = self.cached_episodes[block_id]
-                if eps_stats['admits_by_chunk'][chunk_id] > 1:
+                if eps_stats["admits_by_chunk"][chunk_id] > 1:
                     tags.append("readmission")
             if readmission_from_ep:
                 tags.append("readmissionEp")
             self.bump("admitted", tags=tags)
 
-        if item_kwargs.get('at_ep_start', False):
+        if item_kwargs.get("at_ep_start", False):
             self.bump("admits_at_ep_start")
         else:
             self.bump("admits_after_ep_start")
 
         # insertion
         # TODO: Predict TTL
-        self.cache.admit(key, TTLItem(ts, key, ts_access=ts_access, ttl=ttl, episode=episode, **item_kwargs))
+        self.cache.admit(
+            key,
+            TTLItem(
+                ts, key, ts_access=ts_access, ttl=ttl, episode=episode, **item_kwargs
+            ),
+        )
 
         self.block_counts[block_id] += 1
         self.keys_written += 1
@@ -1049,14 +1291,16 @@ class QueueCache(EvictionPolicy):
         self.log_eviction(ts, evicted)
         if self.on_evict:
             keyfeaturelist, metadata = self.insert_metadata[evicted[1].key]
-            for k in ['last_access_time', 'admission_time', 'hits']:
-                metadata['ramcache_' + k] = getattr(evicted[1], k)
-            for k in ['doomed', 'promotion']:
+            for k in ["last_access_time", "admission_time", "hits"]:
+                metadata["ramcache_" + k] = getattr(evicted[1], k)
+            for k in ["doomed", "promotion"]:
                 if k in evicted[1].stats:
-                    metadata['ramcache_' + k] = evicted[1].stats[k]
+                    metadata["ramcache_" + k] = evicted[1].stats[k]
 
-            metadata['ramcache_admissions'] = 1
-            insert_success = self.on_evict(evicted[1].key, ts, keyfeaturelist, metadata=metadata)
+            metadata["ramcache_admissions"] = 1
+            insert_success = self.on_evict(
+                evicted[1].key, ts, keyfeaturelist, metadata=metadata
+            )
             if not insert_success:
                 self.bump("evicted_already_in_lower_cache")
 
