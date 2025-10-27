@@ -1,4 +1,4 @@
-name: BCacheSim-DT-SLRU
+name: BCacheSim-EDE
 
 on:
     push:
@@ -18,7 +18,7 @@ env:
     PYTHON_VERSION: "3.11"
 
 jobs:
-    BCacheSim-DT-SLRU:
+    BCacheSim-EDE:
         runs-on: ubuntu-latest
         strategy:
             max-parallel: 5
@@ -115,11 +115,11 @@ jobs:
             #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
             #     flake8 BCacheSim/cachesim --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-            - name: Run DT-SLRU (Segmented LRU with DT-aware promotion) simulation (3 mins)
-              timeout-minutes: 6
+            - name: Run EDE (Episode-Deadline Eviction) simulation (10 mins)
+              timeout-minutes: 15
               run: |
                   source $CONDA/etc/profile.d/conda.sh
                   conda activate ${{ env.CONDA_ENV_NAME }}
-                  echo "Running DT-SLRU simulation..."
-                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json
-                  echo "✓ DT-SLRU simulation completed successfully"
+                  echo "Running baseline RejectX simulation..."
+                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
+                  echo "✓ EDE simulation completed successfully"

@@ -722,6 +722,15 @@ class StatsDumper(object):
             ods.get("flashcache/total_ttl"), chunks_written
         )
 
+        if hasattr(self.cache.cache, "total_dt_per_byte"):
+            logjson["results"]["DT-per-byte Score"] = self.cache.cache.dt_per_byte_score
+
+        if hasattr(self.cache.cache, "alpha_tti") and hasattr(
+            self.cache.cache, "protected_cap"
+        ):
+            logjson["results"]["α_TTI"] = self.cache.cache.alpha_tti
+            logjson["results"]["ProtectedCap"] = self.cache.cache.protected_cap
+
         logjson["stats"] = ods.counters
 
         statsjson = {}
@@ -739,6 +748,24 @@ class StatsDumper(object):
         wall_time = time.time() - self.start_time if self.start_time else 0
         logjson["results"]["SimWallClockTime"] = wall_time
         logjson["results"]["SimRAMUsage"] = utils.memory_usage()
+
+        avg_dt_per_byte = 0.0
+        dt_srlu_sum_dt_per_byte = 0.0
+        dt_srlu_min_dt_per_byte = 0.0
+        dt_srlu_max_dt_per_byte = 0.0
+        dt_srlu_items_tracked = 0
+        # print(dir(self.cache.cache))
+        if hasattr(self.cache.cache, "total_dt_per_byte"):
+            if self.cache.cache.total_items_tracked > 0:
+                dt_srlu_sum_dt_per_byte = self.cache.cache.total_dt_per_byte
+                dt_srlu_min_dt_per_byte = self.cache.cache.min_dt_per_byte
+                dt_srlu_max_dt_per_byte = self.cache.cache.max_dt_per_byte
+                avg_dt_per_byte = (
+                    self.cache.cache.total_dt_per_byte
+                    / self.cache.cache.total_items_tracked
+                )
+                # logjson['dt_srlu_avg_dt_per_byte'] = avg_dt_per_byte
+                dt_srlu_items_tracked = self.cache.cache.total_items_tracked
 
         msg = (
             "Results preview: \n "
@@ -1974,7 +2001,17 @@ def simulate_cache_driver(options):
     input_file_name = tracefile[: -len(".trace")].split("/")[-1]
     out_prefix = f"{output_dir}/{input_file_name}"
     # TODO: Make this be an argument
-    results_file = out_prefix + "_cache_perf.txt"
+    if "--dt-per-byte-score" in sys.argv:
+        print(options.dt_per_byte_score)
+        results_file = out_prefix + f"_{options.dt_per_byte_score}" + "_cache_perf.txt"
+    elif "--ede-protected-cap" in sys.argv:
+        results_file = (
+            out_prefix + f"_pcap_{options.ede_protected_cap}" + "_cache_perf.txt"
+        )
+    elif "--ede-alpha-tti" in sys.argv:
+        results_file = out_prefix + f"_ewma_{options.ede_alpha_tti}" + "_cache_perf.txt"
+    else:
+        results_file = out_prefix + "_cache_perf.txt"
     lock = utils.LockFile(out_prefix + ".lock", timeout=600)
 
     if (
