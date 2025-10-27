@@ -3,15 +3,15 @@ import numpy as np
 
 def count_feat(feat_subset):
     cnt = 0
-    feat_subset = feat_subset.split('+')
+    feat_subset = feat_subset.split("+")
     for fx in feat_subset:
-        if fx in ('meta', 'block', 'chunk'):
+        if fx in ("meta", "block", "chunk"):
             cnt += 6
-        elif fx in ('shard'):
+        elif fx in ("shard"):
             cnt += 1
-        elif fx == 'meta_nosize':
+        elif fx == "meta_nosize":
             cnt += 3
-        elif fx == '':
+        elif fx == "":
             continue
         else:
             raise NotImplementedError(f"Unimplemented feature: {fx} {feat_subset}")
@@ -20,20 +20,23 @@ def count_feat(feat_subset):
 
 def collect_features(cache, key, acc):
     block_id, chunk_id = key
-    features = cache.ap.features.split('+')
+    features = cache.ap.features.split("+")
     featvec = []
     for feat_idx in features:
-        if feat_idx == 'meta':
+        if feat_idx == "meta":
             featvec.extend(acc.features.toList(with_size=True))
-        elif feat_idx == 'meta_nosize':
+        elif feat_idx == "meta_nosize":
             featvec.extend(acc.features.toList(with_size=False))
-        elif feat_idx == 'dfeat':
+        elif feat_idx == "dfeat":
             featvec.extend(cache.dynamic_features.getFeature(key))
-        elif feat_idx == 'block':
-            assert cache.dynamic_features.granularity.startswith('block') or cache.dynamic_features.granularity == 'both'
+        elif feat_idx == "block":
+            assert (
+                cache.dynamic_features.granularity.startswith("block")
+                or cache.dynamic_features.granularity == "both"
+            )
             featvec.extend(cache.dynamic_features.getFeature(block_id))
-        elif feat_idx == 'chunk':
-            assert cache.dynamic_features.granularity == 'both'
+        elif feat_idx == "chunk":
+            assert cache.dynamic_features.granularity == "both"
             cfeat = np.zeros(cache.dynamic_features.hours, dtype=int)
             # range(1, 65):
             # TODO: Consider if this should be based on granularity.
@@ -41,13 +44,13 @@ def collect_features(cache, key, acc):
             for chunk_id_ in acc.chunks:
                 cfeat += cache.dynamic_features.getFeature((block_id, chunk_id_))
             featvec.extend(cfeat.tolist())
-        elif feat_idx == 'shard':
+        elif feat_idx == "shard":
             featvec.append(key[0][1])
-        elif feat_idx == 'chunk_ind':
-            raise NotImplementedError('chunk_ind')
+        elif feat_idx == "chunk_ind":
+            raise NotImplementedError("chunk_ind")
             # for chunk_id_ in range(1, 65):
             #     featvec += self.dynamic_features.getFeature((block_id, chunk_id_))
-        elif feat_idx == '':
+        elif feat_idx == "":
             pass
         else:
             raise NotImplementedError(feat_idx)

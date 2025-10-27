@@ -1,4 +1,5 @@
 """Meta trace format specific utilities."""
+
 from enum import Enum, unique
 import sys
 
@@ -36,7 +37,17 @@ class KeyFeatures(object):
     # helps reduce memory footprint
     __slots__ = ["op", "pipeline", "namespace", "user", "offset", "size", "repeat"]
 
-    def __init__(self, *, op=None, pipeline=None, namespace=None, user=None, offset=None, size=None, repeat=1):
+    def __init__(
+        self,
+        *,
+        op=None,
+        pipeline=None,
+        namespace=None,
+        user=None,
+        offset=None,
+        size=None,
+        repeat=1,
+    ):
         self.op = OpType(op)
         self.pipeline = pipeline
         self.namespace = namespace
@@ -62,7 +73,7 @@ class KeyFeatures(object):
         """
         feat = [self.op.value, self.namespace, self.user]
         if with_size:
-            return feat + [self.offset, self.offset+self.size, self.size]
+            return feat + [self.offset, self.offset + self.size, self.size]
         return feat
 
 
@@ -72,8 +83,18 @@ class BlkAccess(object):
     MAX_BLOCK_SIZE = 8 * 1024 * 1024
 
     # helps reduce memory footprint
-    __slots__ = ["ts", "ts_logical", "offset", "endoffset", "c", "features",
-                 "orig_offset", "orig_endoffset", "block", "episode"]
+    __slots__ = [
+        "ts",
+        "ts_logical",
+        "offset",
+        "endoffset",
+        "c",
+        "features",
+        "orig_offset",
+        "orig_endoffset",
+        "block",
+        "episode",
+    ]
 
     @staticmethod
     def roundDownToBlockBegin(off):
@@ -85,8 +106,17 @@ class BlkAccess(object):
 
     # offsets can be in the middle of a block. round them to the alignment to
     # emulate caching at a chunk level
-    def __init__(self, offset, size, time, *,
-                 features=None, ts_logical=None, block=None, episode=None):
+    def __init__(
+        self,
+        offset,
+        size,
+        time,
+        *,
+        features=None,
+        ts_logical=None,
+        block=None,
+        episode=None,
+    ):
         self.block = block
         self.ts = time
         self.ts_logical = ts_logical
@@ -153,10 +183,16 @@ class KeyAndAccesses(object):
 
 # read the processed file and return a dictionary of key to all its BlkAccess
 # sorted by access time.
-def read_processed_file(f, get_features=True, only_gets=True, only_puts=False,
-                        with_pipeline=None, assert_monotonic=True,
-                        min_ts_from_start=None,
-                        max_ts_from_start=None):
+def read_processed_file(
+    f,
+    get_features=True,
+    only_gets=True,
+    only_puts=False,
+    with_pipeline=None,
+    assert_monotonic=True,
+    min_ts_from_start=None,
+    max_ts_from_start=None,
+):
     if with_pipeline is None:
         with_pipeline = trace_has_pipeline(f)
     print(f"Reading from file {f}")
@@ -169,7 +205,7 @@ def read_processed_file(f, get_features=True, only_gets=True, only_puts=False,
         # key_map = {}
         for line in of:
             try:
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
                 parts = line.split(" ")
                 parts = [p.strip("\n") for p in parts]
@@ -220,7 +256,15 @@ def read_processed_file(f, get_features=True, only_gets=True, only_puts=False,
                     user = int(parts[6])
 
                 if op is not None:
-                    f = KeyFeatures(op=op, pipeline=pipeline, namespace=namespace, user=user, offset=off, size=size, repeat=1)
+                    f = KeyFeatures(
+                        op=op,
+                        pipeline=pipeline,
+                        namespace=namespace,
+                        user=user,
+                        offset=off,
+                        size=size,
+                        repeat=1,
+                    )
 
                 if only_gets and (f is None or f.op not in GET_OPS):
                     continue
@@ -233,9 +277,16 @@ def read_processed_file(f, get_features=True, only_gets=True, only_puts=False,
                 if k not in accesses:
                     accesses[k] = KeyAndAccesses(k)
 
-                interval = 0 if repeat == 1 else 1. / (repeat - 1)
+                interval = 0 if repeat == 1 else 1.0 / (repeat - 1)
                 for repeat_i in range(repeat):
-                    acc = BlkAccess(off, size, ts + repeat_i * interval, features=f, block=k, ts_logical=i)
+                    acc = BlkAccess(
+                        off,
+                        size,
+                        ts + repeat_i * interval,
+                        features=f,
+                        block=k,
+                        ts_logical=i,
+                    )
                     accesses[k].addAccess(acc)
                     i += 1
                     # This is used for IOPS saved ratio, so going by chunks doesn't work.
@@ -256,7 +307,9 @@ def add_logical_timestamps(k_accesses):
     for k in k_accesses:
         for a in k_accesses[k].accesses:
             physical_timestamps.add((a.ts, a.ts_logical))
-    physical_to_logical = dict((b, a) for a, b in enumerate(sorted(physical_timestamps)))
+    physical_to_logical = dict(
+        (b, a) for a, b in enumerate(sorted(physical_timestamps))
+    )
     for k in k_accesses:
         for a in k_accesses[k].accesses:
             a.ts_logical = physical_to_logical[(a.ts, a.ts_logical)]
@@ -264,7 +317,9 @@ def add_logical_timestamps(k_accesses):
 
 
 def read_processed_file_with_logical_ts(f, get_features=True, **kwargs):
-    k_accesses, start_ts, end_ts = read_processed_file(f, get_features=get_features, **kwargs)
+    k_accesses, start_ts, end_ts = read_processed_file(
+        f, get_features=get_features, **kwargs
+    )
     physical_to_logical = add_logical_timestamps(k_accesses)
     return k_accesses, start_ts, end_ts, physical_to_logical
 
@@ -292,7 +347,11 @@ def get_output_suffix(options):
     # admission policy notes
     if options.rejectx_ap:
         out += f"rejectx-ap-{options.ap_threshold:g}_{options.ap_probability:g}"
-    elif options.ap == "hybrid" or options.ap.startswith("either") or options.ap.startswith("and"):
+    elif (
+        options.ap == "hybrid"
+        or options.ap.startswith("either")
+        or options.ap.startswith("and")
+    ):
         if options.ap == "hybrid":
             out += f"hybrid-ap-{options.hybrid_ap_threshold:g}_"
         else:
@@ -309,7 +368,9 @@ def get_output_suffix(options):
     elif options.offline_ap:
         out += f"offline-ap-{options.ap_threshold:g}"
     elif options.ap == "flashieldprob":
-        out += f"{options.ap}-{options.flashieldprob_ap_min_hits}-{options.ap_threshold:g}"
+        out += (
+            f"{options.ap}-{options.flashieldprob_ap_min_hits}-{options.ap_threshold:g}"
+        )
     else:
         out += f"{options.ap}-{options.ap_threshold:g}"
 

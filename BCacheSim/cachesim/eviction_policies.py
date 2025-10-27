@@ -322,6 +322,212 @@ class DTSLRUPolicy(EvictionImpl):
         return key in self.probation_items or key in self.protected_items
 
 
+class EDEPolicy(EvictionImpl):
+    """
+    Episode-Deadline Eviction (EDE):
+        * Predicts item expiry using time-to-idle estimates.
+        * Evicts keys closest to predicted episode end, while protecting high DT-per-byte items.
+    """
+
+    def __init__(
+        self,
+        dt_per_byte_score: float,
+        protected_cap: float,
+        alpha_tti: float,
+        cache_size: int,
+    ):
+        """
+        EDE Policy with time-to-idle prediction and DT-per-byte protection with PROTECTED cap and α_tti EWMA adaptation.
+            * dt_per_byte_score: Minimum DT-per-byte score to protect items from eviction (seconds/byte)
+            * time_to_idle_threshold: Maximum time-to-idle to consider for protection (seconds)
+            * protected_cap: Maximum fraction of cache reserved for Protected items (0.0-1.0)
+            * alpha_tti: EWMA smoothing factor for time-to-idle updates (0.0-1.0)
+                - α_tti close to 1 → expiry estimates adapt quickly
+                - α_tti small → expiry estimates update slowly
+        """
+        time_to_idle_threshold = 3600
+
+        self.items: OrderedDict[tuple[str, int], TTLItem] = OrderedDict()
+        self.protected_items: set[tuple[str, int]] = set()
+        self.protected_items_size: int = int(cache_size * protected_cap)
+        self.items_stats: dict[
+            tuple[str, int], tuple[float, float]
+        ] = {}  # key -> (time_to_idle_estimate, dt_per_byte_score)
+        self.pqueue = (
+            pqdict.pqdict()
+        )  # Priority queue by time-to-idle (lower = higher eviction priority)
+        self.dt_per_byte_score: float = (
+            dt_per_byte_score  # Protect high DT-per-byte items
+        )
+        self.time_to_idle_threshold: float = (
+            time_to_idle_threshold  # Protect items with long time-to-idle
+        )
+        self.protected_cap: float = protected_cap
+        self.alpha_tti: float = alpha_tti
+
+        # print(self.protected_items_size)
+        # track EWMA state
+        self.ewma_states: dict[tuple[str, int], dict[str, float]] = {}
+
+    def update_ewma_time_to_idle(self, key: tuple[str, int], new_tti: float) -> float:
+        """Update time-to-idle using EWMA with α_tti smoothing"""
+        if key not in self.ewma_states:
+            # Initialize EWMA state
+            self.ewma_states[key] = {"prev_tti": new_tti, "ewma_tti": new_tti}
+            return new_tti
+
+        # Apply EWMA here: ewma_tti = α_tti * new_tti + (1 - α_tti) * prev_ewma_tti
+        prev_ewma = self.ewma_states[key]["ewma_tti"]
+        new_ewma = self.alpha_tti * new_tti + (1 - self.alpha_tti) * prev_ewma
+
+        # Update EWMA state
+        self.ewma_states[key]["prev_tti"] = prev_ewma
+        self.ewma_states[key]["ewma_tti"] = new_ewma
+
+        return new_ewma
+
+    def estimate_time_to_idle(self, key: tuple[str, int], item: TTLItem) -> float:
+        """
+        Estimate time until item becomes idle using episode context
+        """
+
+        base_tti = item.max_interarrival_time[0]
+
+        # Apply EWMA smoothing if we have historical data
+        if key and key in self.ewma_states:
+            return self.update_ewma_time_to_idle(key, base_tti)
+
+        return base_tti
+
+    def should_protect(self, key: tuple[str, int], item: TTLItem):
+        """
+        Determine if item should be protected from eviction
+        """
+
+        # current_protected_ratio = len(self.protected_items) / max(len(self.items), 1)
+
+        # If we're already at cap, only protect not at capacity
+        # if current_protected_ratio >= self.protected_cap:
+        #     return False
+        if len(self.protected_items) == self.protected_items_size:
+            return False
+
+        # Calculate DT-per-byte score
+        dt_score = item.calculate_dt_per_byte()
+
+        # Protect high DT-per-byte items
+        if dt_score > self.dt_per_byte_score:
+            return True
+
+        # # Calculate time-to-idle estimate
+        # time_to_idle = self.estimate_time_to_idle(key, item)
+
+        # # Protect items with long time-to-idle (still valuable)
+        # if time_to_idle > self.time_to_idle_threshold:
+        #     return True
+
+        return False
+
+    def admit(self, key: tuple[str, int], item: TTLItem):
+        """
+        Admit item with time-to-idle estimation and DT-per-byte scoring
+        """
+        # Calculate metrics
+        time_to_idle = self.estimate_time_to_idle(key, item)
+        dt_per_byte = item.calculate_dt_per_byte()
+
+        # Store item with metrics
+        self.items[key] = item
+        self.items_stats[key] = (time_to_idle, dt_per_byte)
+
+        # Initialize EWMA state
+        if key not in self.ewma_states:
+            self.ewma_states[key] = {"prev_tti": time_to_idle, "ewma_tti": time_to_idle}
+
+        # Determine if item should be protected
+        if self.should_protect(key, item):
+            self.protected_items.add(key)
+
+        # Add to priority queue (lower time-to-idle = higher eviction priority)
+        # Use negative time-to-idle for max-heap behavior (we want smallest time-to-idle first)
+        self.pqueue[key] = -time_to_idle
+
+    def touch(self, key: tuple[str, int]):
+        """
+        Update item position and recalculate time-to-idle
+        """
+        if key not in self.items:
+            return
+
+        old_time_to_idle, dt_per_byte = self.items_stats[key]
+
+        item = self.items[key]
+
+        # Recalculate time-to-idle on access
+        new_time_to_idle = self.estimate_time_to_idle(key, item)
+
+        # Update stored metrics
+        self.items_stats[key] = (new_time_to_idle, dt_per_byte)
+
+        if key not in self.protected_items and self.should_protect(key, item):
+            self.protected_items.add(key)
+
+        # Update priority queue if time-to-idle changed significantly
+        # if abs(new_time_to_idle - old_time_to_idle) > 1:  # 1 second threshold
+        self.pqueue.updateitem(key, -new_time_to_idle)
+
+        # self.items.move_to_end(key, last=False)
+
+    def evict(
+        self, key: tuple[str, int] | None = None
+    ) -> tuple[tuple[str, int], TTLItem]:
+        """
+        Evict item with lowest time-to-idle, respecting protection rules
+        """
+        if key is not None:
+            del self.pqueue[key]
+            del self.items_stats[key]
+            self.protected_items.discard(key)
+            return key, self.items.pop(key)
+
+        # Find victim: item with lowest time-to-idle that is not protected
+        # temp_pqueue = pqdict.pqdict(self.pqueue)
+        # for key, priority in temp_pqueue.popitems():
+        #     item = self.items[key]
+
+        #     if not self.should_protect(item, current_time):
+        #         del self.pqueue[key]
+        #         del self.items_stats[key]
+        #         return key, self.items.pop(key)
+
+        # Failed to find a victim
+        # Get item with lowest time-to-idle (highest eviction priority)
+        key, _ = self.pqueue.popitem()
+        del self.items_stats[key]
+        self.protected_items.discard(key)
+        return key, self.items.pop(key)
+
+    def victim(self) -> tuple[str, int] | None:
+        """
+        Return the next item that will be evicted (not protected)
+        """
+        # Try to find a victim that is not protected
+        temp_pqueue = pqdict.pqdict(self.pqueue)
+
+        for victim_key, priority in temp_pqueue.popitems():
+            victim_item = self.items[victim_key]
+
+            # if not self.should_protect(victim_key, victim_item):
+            #     return victim_key
+            if victim_item not in self.protected_items:
+                return victim_key
+
+        if len(self.pqueue) > 0:
+            return self.pqueue.top()
+
+        return None
+
+
 class TTLModel(object):
     def __init__(self, options):
         model_path = options.ttl_model_path
@@ -908,6 +1114,13 @@ class QueueCache(EvictionPolicy):
             self.cache = TTLPolicy()
         elif options.eviction_policy and options.eviction_policy == "DT-SLRU":
             self.cache = DTSLRUPolicy(options.dt_per_byte_score)
+        elif options.eviction_policy and options.eviction_policy == "EDE":
+            self.cache = EDEPolicy(
+                options.dt_per_byte_score,
+                options.ede_protected_cap,
+                options.ede_alpha_tti,
+                self.cache_size,
+            )
         else:
             self.cache = LRUPolicy()
         self.block_counts = Counter()
@@ -943,7 +1156,13 @@ class QueueCache(EvictionPolicy):
             self.ttl_predicter = TTLModel(options)
         elif options.eviction_policy == "ttl-opt":
             self.ttl_predicter = TTLOpt()
-        elif not options.eviction_policy.startswith("LRU") and not options.eviction_policy.startswith("DT-SLRU"):
+        elif options.eviction_policy == "LRU":
+            pass
+        elif options.eviction_policy == "DT-SLRU":
+            pass
+        elif options.eviction_policy == "EDE":
+            pass
+        else:
             raise NotImplementedError(options.eviction_policy)
 
         self.on_evict = on_evict

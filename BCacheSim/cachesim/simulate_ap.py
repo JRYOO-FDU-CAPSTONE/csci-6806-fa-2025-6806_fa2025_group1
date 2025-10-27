@@ -200,6 +200,18 @@ def get_parser():
         default=0.002,
         help="DT per byte threshold for DT-SLRU/EDE policy (seconds/byte)",
     )
+    parser.add_argument(
+        "--ede-protected-cap",
+        type=float,
+        default=0.2,
+        help="protected_cap: Maximum fraction of cache reserved for Protected items (0.0-1.0)",
+    )
+    parser.add_argument(
+        "--ede-alpha-tti",
+        type=float,
+        default=0.2,
+        help="EWMA smoothing factor for time-to-idle updates (0.0-1.0)",
+    )
     return parser
 
 
