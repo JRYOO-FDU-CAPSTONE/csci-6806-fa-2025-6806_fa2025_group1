@@ -943,7 +943,9 @@ class QueueCache(EvictionPolicy):
             self.ttl_predicter = TTLModel(options)
         elif options.eviction_policy == "ttl-opt":
             self.ttl_predicter = TTLOpt()
-        elif not options.eviction_policy.startswith("LRU") and not options.eviction_policy.startswith("DT-SLRU"):
+        elif not options.eviction_policy.startswith(
+            "LRU"
+        ) and not options.eviction_policy.startswith("DT-SLRU"):
             raise NotImplementedError(options.eviction_policy)
 
         self.on_evict = on_evict
