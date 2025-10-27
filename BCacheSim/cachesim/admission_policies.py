@@ -2,7 +2,6 @@ from collections import Counter
 from collections import OrderedDict
 from collections import defaultdict
 from collections import deque
-
 # import methodtools
 import random
 
@@ -30,7 +29,7 @@ from ..episodic_analysis.episodes import service_time
 
 class AP(object):
     def __init__(self):
-        self.features = ""
+        self.features = ''
 
     def accept(self, key, ts, metadata=None):
         raise NotImplementedError
@@ -44,7 +43,7 @@ class AP(object):
     def count_decisions(self, decisions):
         accepts = sum(1 for v in decisions.values() if v)
         ods.bump(f"ap_{self.name}_accepts", v=accepts)
-        ods.bump(f"ap_{self.name}_rejects", v=len(decisions) - accepts)
+        ods.bump(f"ap_{self.name}_rejects", v=len(decisions)-accepts)
         return decisions
 
     @property
@@ -92,12 +91,10 @@ class RejectXAP(AP):
         if metadata is None:
             ts_inserted = ts
         else:
-            ts_inserted = metadata["ts"][key]
+            ts_inserted = metadata['ts'][key]
         if result:
             self.accepts += 1
-            LOG_REQ(
-                "flashcache", key, ts, "SET", result="Accept {}".format(self.accepts)
-            )
+            LOG_REQ("flashcache", key, ts, "SET", result="Accept {}".format(self.accepts))
         return result
 
     @property
@@ -192,7 +189,7 @@ class FlashieldAP(AP):
                 self.start_ts = ts
 
     def batchAccept(self, batch, ts, metadata=None, check_only=False):
-        feats = [metadata["ramcache_hits"][key] for key in batch]
+        feats = [metadata['ramcache_hits'][key] for key in batch]
         if self.classifier is None:
             decs = [True] * len(feats)
         else:
@@ -208,7 +205,7 @@ class FlashieldAP(AP):
     def accept(self, key, ts, metadata=None):
         if self.classifier is None:
             return True
-        ramhits = metadata["ramcache_hits"][key]
+        ramhits = metadata['ramcache_hits'][key]
         ods.bump("ml_predictions")
         return self.classifier.predict([ramhits])
 
@@ -219,7 +216,6 @@ class FlashieldAP(AP):
 class FlashieldProbAP(FlashieldAP):
     """Vanilla Flashield becomes too selective because of lack of DRAM hits.
     We try and predict a flashiness score. Use predict_proba"""
-
     def __init__(self, *args, n=None, **kwargs):
         assert n is not None
         super().__init__(*args, **kwargs)
@@ -227,7 +223,7 @@ class FlashieldProbAP(FlashieldAP):
         self.trainer = FlashieldModel(threshold=n, probability=True)
 
     def batchAccept(self, batch, ts, metadata=None, check_only=False):
-        feats = [metadata["ramcache_hits"][key] for key in batch]
+        feats = [metadata['ramcache_hits'][key] for key in batch]
         if self.classifier is None:
             decs = [True] * len(feats)
         else:
@@ -246,7 +242,7 @@ class FlashieldProbAP(FlashieldAP):
     def accept(self, key, ts, metadata=None):
         if self.classifier is None:
             return True
-        ramhits = metadata["ramcache_hits"][key]
+        ramhits = metadata['ramcache_hits'][key]
         ods.bump("ml_predictions")
         return self.classifier.predict_proba([ramhits])[:, 1] >= self.threshold
 
@@ -265,7 +261,6 @@ class CoinFlipAP(AP):
 
 class CoinFlipDetAP(AP):
     """Deterministic Coin Flip AP"""
-
     def __init__(self, probability):
         super().__init__()
         self.prob = probability
@@ -275,20 +270,12 @@ class CoinFlipDetAP(AP):
         if metadata is None:
             ts_inserted = ts
         else:
-            ts_inserted = metadata["ts"][key]
-        h = spookyhash.hash64(
-            bytes(f"{key[0]}|{ts_inserted.logical + 1}", "ascii"), seed=self.seed
-        )
+            ts_inserted = metadata['ts'][key]
+        h = spookyhash.hash64(bytes(f"{key[0]}|{ts_inserted.logical+1}", "ascii"),seed=self.seed)
         hf = h / ((1 << 64) - 1)
         result = hf < self.prob
         if not check_only:
-            LOG_REQ(
-                "flashcache",
-                key,
-                ts,
-                "SET",
-                result=f"{ts_inserted.logical + 1} {h} {hf} {'Accept' if result else 'Reject'}",
-            )
+            LOG_REQ("flashcache", key, ts, "SET", result=f"{ts_inserted.logical+1} {h} {hf} {'Accept' if result else 'Reject'}")
         return result
 
     @property
@@ -306,7 +293,7 @@ class LearnedAP(AP):
         self.threshold = threshold
         self.gbm = lgb.Booster(model_file=model_path)
         self.seen_before = Counter()
-        self.features = "dfeat+meta"
+        self.features = 'dfeat+meta'
 
     def _predict(self, batch, ts):
         Xs = list(batch.values())
@@ -314,7 +301,7 @@ class LearnedAP(AP):
         Xs = [x[:-3] if len(x) == 12 else x for x in Xs]
         features = np.array(Xs)
         # for x in Xs:
-        #     self.seen_before[tuple(x)] += 1
+        #     self.seen_before[tuple(x)] += 1    
         # TODO: Log and check for seen-before features
         # result:
         # dynF0 .. dynF11 lAD kf1 kf2 kf3 size
@@ -349,25 +336,20 @@ class LearnedSizeAP(LearnedAP):
 
     def batchAccept(self, batch, ts, metadata=None, check_only=False):
         predictions = self._predict(batch, ts)
-        sizes = metadata["size"]
-        decisions = {
-            k: pred / sizes[k] > self.threshold
-            for k, pred in zip(batch.keys(), predictions)
-        }
+        sizes = metadata['size']
+        decisions = {k: pred / sizes[k] > self.threshold
+                     for k, pred in zip(batch.keys(), predictions)}
         if not check_only:
             self.count_decisions(decisions)
         return decisions
 
 
 class NewMLAP(LearnedAP):
-    def __init__(self, *args, feat_subset="meta+block+chunk", **kwargs):
+    def __init__(self, *args, feat_subset='meta+block+chunk', **kwargs):
         super().__init__(*args, **kwargs)
         self.features = feat_subset
         self.num_features = count_feat(feat_subset)
-        assert len(self.gbm.feature_name()) == self.num_features, (
-            self.gbm.feature_name(),
-            self.num_features,
-        )
+        assert len(self.gbm.feature_name()) == self.num_features, (self.gbm.feature_name(), self.num_features)
 
     def __predict(self, batch, ts):
         Xs = list(batch.values())
@@ -401,17 +383,12 @@ class TrainingEpisode(object):
         self.score = None
 
     def add_access(self, acc):
-        new_chunk_range = [
-            min(self.chunk_range[0], acc.chunk_range[0]),
-            max(self.chunk_range[1], acc.chunk_range[1]),
-        ]
-        added_chunks = new_chunk_range[1] - new_chunk_range[0] - self.num_chunks
+        new_chunk_range = [min(self.chunk_range[0], acc.chunk_range[0]), max(self.chunk_range[1], acc.chunk_range[1])]
+        added_chunks = new_chunk_range[1] - new_chunk_range[0] - self.num_chunks 
         self.num_chunks = new_chunk_range[1] - new_chunk_range[0]
         self.chunk_range = new_chunk_range
         self.s["service_time_orig"] += service_time(1, acc.num_chunks)
-        self.s["service_time_saved__prefetch"] += (
-            service_time(1, acc.num_chunks) - added_chunks
-        )
+        self.s["service_time_saved__prefetch"] += service_time(1, acc.num_chunks) - added_chunks
         assert acc.ts > self.ts_range[1]
         self.ts_range[1] = acc.ts
         self.num_accesses += 1
@@ -557,15 +534,9 @@ class GBTrainer(object):
 
         if len(eps_for_training_) < self.min_eps_for_training:
             return False
-        self.eps_train, self.eps_test = train_test_split(
-            eps_for_training_, test_size=0.3, random_state=42
-        )
-        self.X_train, self.Y_scores_train, self.cutoff = self.X_from_eps(
-            self.eps_train, threshold
-        )
-        self.X_test, self.Y_scores_test, self.cutoff_test = self.X_from_eps(
-            self.eps_test, threshold
-        )
+        self.eps_train, self.eps_test = train_test_split(eps_for_training_, test_size=0.3, random_state=42)
+        self.X_train, self.Y_scores_train, self.cutoff = self.X_from_eps(self.eps_train, threshold)
+        self.X_test, self.Y_scores_test, self.cutoff_test = self.X_from_eps(self.eps_test, threshold)
         self.Y_train = self.Y_from_scores(self.Y_scores_train, self.cutoff)
         self.Y_test = self.Y_from_scores(self.Y_scores_test, self.cutoff)
         self.dsTrain = lgb.Dataset(self.X_train, self.Y_train)
@@ -593,28 +564,24 @@ class GBTrainer(object):
         # self.Y = self.scores >= self.cutoff
         # self.dsTrain = lgb.Dataset(self.X, self.Y)
         # print(self.X[0])
-        print(
-            f"Training Baleen model with {len(eps_for_training_)} episodes ({len(self.eps_train)} done) - {len(self.X_train)} examples"
-        )
+        print(f"Training Baleen model with {len(eps_for_training_)} episodes ({len(self.eps_train)} done) - {len(self.X_train)} examples")
         print(f"Cutoff: {self.cutoff}")
         return True
 
     def reset_data(self, min_end_ts=None):
-        self.eps_for_training = [
-            ep for ep in self.eps_for_training if ep.ts_range[1].physical >= min_end_ts
-        ]
+        self.eps_for_training = [ep for ep in self.eps_for_training
+                                 if ep.ts_range[1].physical >= min_end_ts]
 
     def train(self, threshold):
         if not self.compute_data(threshold):
             return
-        return lgb.train(
-            self.params,
-            self.dsTrain,
-            num_boost_round=self.iterations,
-            valid_sets=self.dsTest,
-            verbose_eval=False,
-            early_stopping_rounds=25,
-        )
+        return lgb.train(self.params,
+                         self.dsTrain,
+                         num_boost_round=self.iterations,
+                         valid_sets=self.dsTest,
+                         verbose_eval=False,
+                         early_stopping_rounds=25,
+                         )
 
 
 class LocalMLAP(NewMLAP):
@@ -625,10 +592,11 @@ class LocalMLAP(NewMLAP):
     Need to know what labels are by only looking back.
     Labels: episode DT saved/size > score_cutoff [based on WR]
     """
-
-    def __init__(
-        self, *, threshold=None, retrain_interval_hrs=6, train_history_hrs=24, **kwargs
-    ):
+    def __init__(self, *,
+                 threshold=None,
+                 retrain_interval_hrs=6,
+                 train_history_hrs=24,
+                 **kwargs):
         self.threshold = threshold
         assert threshold is not None
         self.retrain_interval_hrs = retrain_interval_hrs
@@ -641,7 +609,7 @@ class LocalMLAP(NewMLAP):
             "evict": [self.trainer.on_evict],
         }
         # self.features = 'dfeat+meta'
-        self.features = "meta+block+chunk"
+        self.features = 'meta+block+chunk'
         # TODO: Make fallback RejectX
         self.fallback = AcceptAll()
         self.ts_last_trained = None
@@ -666,9 +634,7 @@ class LocalMLAP(NewMLAP):
                 print("Trained initial model")
         elif self.gbm is not None:
             # Check criteria for retraining
-            if (
-                acc.ts - self.ts_last_trained
-            ).physical > self.retrain_interval_hrs * 3600:
+            if (acc.ts - self.ts_last_trained).physical > self.retrain_interval_hrs * 3600:
                 self.retrain(acc)
 
     def batchAccept(self, batch, ts, metadata=None, check_only=False):
@@ -684,25 +650,25 @@ class LocalMLAP(NewMLAP):
 
 
 class HybridAP(AP):
-    def __init__(self, aps, threshold, seed=1, which_ts="episode"):
+    def __init__(self, aps, threshold, seed=1, which_ts='episode'):
         self.aps = aps
         self.threshold = threshold
         self.seed = seed
         self.ts = which_ts
-        self.features = "dfeat+meta"
+        self.features = 'dfeat+meta'
         assert len(aps) == 2
 
     def split(self, key, ts, metadata=None, **kwargs):
-        if self.ts == "episode":
-            episode = metadata["episode"][key]
+        if self.ts == 'episode':
+            episode = metadata['episode'][key]
             ts_hash = episode.ts_logical[0]
         else:
             if metadata is None:
                 ts_inserted = ts
             else:
-                ts_inserted = metadata["ts"][key]
+                ts_inserted = metadata['ts'][key]
             ts_hash = ts_inserted
-        h = spookyhash.hash64(bytes(f"{key[0]}|{ts_hash + 1}", "ascii"), seed=self.seed)
+        h = spookyhash.hash64(bytes(f"{key[0]}|{ts_hash+1}", "ascii"), seed=self.seed)
         hf = h / ((1 << 64) - 1)
         result = hf < self.threshold
         return 0 if result else 1
@@ -729,7 +695,7 @@ class HybridAP(AP):
 class EitherAP(AP):
     def __init__(self, aps):
         self.aps = aps
-        self.features = "dfeat+meta"
+        self.features = 'dfeat+meta'
 
     def batchAccept(self, batch, ts, *, metadata=None, check_only=False):
         results = {}
@@ -823,12 +789,10 @@ class OfflineAP(AP):
         if metadata is None:
             ts_inserted = ts
         else:
-            ts_inserted = metadata["ts"][key]
-        episode = metadata["episode"][key]
+            ts_inserted = metadata['ts'][key]
+        episode = metadata['episode'][key]
         if episode is None:
-            print(
-                f"Error: Episode not found: Block: {block_id}, Chunk: {chunk_id}, TS: {ts_inserted}"
-            )
+            print(f'Error: Episode not found: Block: {block_id}, Chunk: {chunk_id}, TS: {ts_inserted}')
             return False
         return episode.threshold <= self.threshold
 
@@ -849,12 +813,10 @@ class OfflinePlus(AP):
 
     def accept(self, key, ts, metadata=None):
         block_id, chunk_id = key
-        ts_inserted = metadata["ts"][key]
-        episode = metadata["episode"][key]
+        ts_inserted = metadata['ts'][key]
+        episode = metadata['episode'][key]
         if episode is None:
-            print(
-                f"Error: Episode not found: Block: {block_id}, Chunk: {chunk_id}, TS: {ts_inserted}"
-            )
+            print(f'Error: Episode not found: Block: {block_id}, Chunk: {chunk_id}, TS: {ts_inserted}')
             return False
         if not (episode.threshold <= self.threshold):
             return False
@@ -862,10 +824,7 @@ class OfflinePlus(AP):
         if chunk_id not in episode.chunk_last_seen:
             if self.only_used_chunks:
                 return False
-        elif (
-            self.check_future_use
-            and ts.physical >= episode.chunk_last_seen[chunk_id][0]
-        ):
+        elif self.check_future_use and ts.physical >= episode.chunk_last_seen[chunk_id][0]:
             return False
         # if episode.s["sim_chunk_written"][chunk_id] > 0:
         #     ods.bump("attempted_readmission")
@@ -941,9 +900,7 @@ class RejectFirstWriteRateAP(AP):
         self.write_rate_ap = WriteRateRejectAP(write_mbps, val_size)
 
     def accept(self, k, ts, check_only=False):
-        return self.reject_first_ap.accept(
-            k, ts, check_only=check_only
-        ) and self.write_rate_ap.accept(k, ts, check_only=check_only)
+        return self.reject_first_ap.accept(k, ts, check_only=check_only) and self.write_rate_ap.accept(k, ts, check_only=check_only)
 
     def batchAccept(self, batch, ts, check_only=False):
         decisions = {}
@@ -960,9 +917,7 @@ def construct(ap_id, options, threshold=None, **kwargs):
     ap = None
     if threshold is None:
         threshold = options.ap_threshold
-    scaled_write_mbps = (
-        float(options.write_mbps) * float(kwargs["sample_ratio"]) / 100.0
-    )
+    scaled_write_mbps = float(options.write_mbps) * float(kwargs['sample_ratio']) / 100.0
     if ap_id == "rejectx":
         if threshold is None:
             threshold = 1
@@ -970,12 +925,10 @@ def construct(ap_id, options, threshold=None, **kwargs):
         if options.ap_probability:
             factor = options.ap_probability
         if scaled_write_mbps == 0:
-            ap = RejectXAP(threshold, factor * kwargs["num_cache_elems"], factor=factor)
+            ap = RejectXAP(threshold, factor * kwargs['num_cache_elems'], factor=factor)
         else:
             ap = RejectFirstWriteRateAP(
-                2 * kwargs["num_cache_elems"],
-                scaled_write_mbps,
-                utils.BlkAccess.ALIGNMENT,
+                2 * kwargs['num_cache_elems'], scaled_write_mbps, utils.BlkAccess.ALIGNMENT
             )
     elif ap_id == "optplus":
         assert threshold
@@ -992,9 +945,7 @@ def construct(ap_id, options, threshold=None, **kwargs):
     elif ap_id == "either_mlrejectx":
         aps = [
             construct("ml", options, threshold=options.ap_threshold, **kwargs),
-            construct(
-                "rejectx", options, threshold=options.rejectx_ap_threshold, **kwargs
-            ),
+            construct("rejectx", options, threshold=options.rejectx_ap_threshold, **kwargs),
         ]
         ap = EitherAP(aps)
     elif ap_id == "either_mlopt":
@@ -1019,38 +970,30 @@ def construct(ap_id, options, threshold=None, **kwargs):
         assert options.learned_ap_model_path and threshold, (options, threshold)
         kwargs_ = {}
         if options.ap_feat_subset:
-            kwargs_["feat_subset"] = options.ap_feat_subset
+            kwargs_['feat_subset'] = options.ap_feat_subset
         ap = NewMLAP(threshold, model_path=options.learned_ap_model_path, **kwargs_)
-        print(
-            f"{ap.name} with model: {options.learned_ap_model_path} threshold: {threshold}"
-        )
+        print(f"{ap.name} with model: {options.learned_ap_model_path} threshold: {threshold}")
     elif ap_id == "mlonline":
         # assert threshold, (options, threshold)
         kwargs_ = {}
         if options.ap_feat_subset:
-            kwargs_["feat_subset"] = options.ap_feat_subset
+            kwargs_['feat_subset'] = options.ap_feat_subset
         if options.retrain_interval_hrs:
-            kwargs_["retrain_interval_hrs"] = options.retrain_interval_hrs
+            kwargs_['retrain_interval_hrs'] = options.retrain_interval_hrs
         if options.train_history_hrs:
-            kwargs_["train_history_hrs"] = options.train_history_hrs
+            kwargs_['train_history_hrs'] = options.train_history_hrs
         ap = LocalMLAP(threshold=threshold, **kwargs_)
-        print(
-            f"{ap.name} with threshold: {threshold}, retrain every {ap.retrain_interval_hrs} hrs on last {ap.train_history_hrs} hrs"
-        )
+        print(f"{ap.name} with threshold: {threshold}, retrain every {ap.retrain_interval_hrs} hrs on last {ap.train_history_hrs} hrs")
     elif ap_id == "ml":
         assert options.learned_ap_model_path and threshold, (options, threshold)
         if options.learned_size:
             # ap = CachedLearnedSizeAP(options.ap_threshold, model_path=options.learned_ap_model_path)
-            ap = LearnedSizeAP(
-                threshold,
-                model_path=options.learned_ap_model_path,
-                size_opt=options.size_opt,
-            )
+            ap = LearnedSizeAP(threshold,
+                               model_path=options.learned_ap_model_path,
+                               size_opt=options.size_opt)
         else:
             ap = LearnedAP(threshold, model_path=options.learned_ap_model_path)
-        print(
-            f"{ap.name} with model: {options.learned_ap_model_path} threshold: {threshold}"
-        )
+        print(f"{ap.name} with model: {options.learned_ap_model_path} threshold: {threshold}")
     elif ap_id == "flashield":
         assert threshold, (threshold, options)
         ap = FlashieldAP(threshold=threshold)
@@ -1058,31 +1001,26 @@ def construct(ap_id, options, threshold=None, **kwargs):
     elif ap_id == "flashieldprob":
         assert options.flashieldprob_ap_min_hits and threshold, (threshold, options)
         ap = FlashieldProbAP(threshold=threshold, n=options.flashieldprob_ap_min_hits)
-        print(
-            f"FlashieldProb AP (threshold: {threshold}, n: {options.flashieldprob_ap_min_hits})"
-        )
+        print(f"FlashieldProb AP (threshold: {threshold}, n: {options.flashieldprob_ap_min_hits})")
     elif ap_id == "tinylfu":
         # window_frac = 0.01
         assert threshold, (threshold, options)
         window_frac = threshold
-        ap = TinyLFUAP(window_frac=window_frac, cache_size=kwargs["num_cache_elems"])
-        print(
-            f"TinyLFU AP (w_frac: {window_frac}, w_size: {int(window_frac * kwargs['num_cache_elems'])})"
-        )
+        ap = TinyLFUAP(window_frac=window_frac, cache_size=kwargs['num_cache_elems'])
+        print(f"TinyLFU AP (w_frac: {window_frac}, w_size: {int(window_frac * kwargs['num_cache_elems'])})")
     elif ap_id == "opt":
         assert options.offline_ap_decisions and threshold
-        ap = OfflineAP(
-            kwargs["episodes"], threshold, flip_threshold=options.flip_threshold
-        )
+        ap = OfflineAP(kwargs['episodes'], threshold,
+                       flip_threshold=options.flip_threshold)
         print(f"Offline AP (threshold: {threshold})")
     elif ap_id == "coinflip":
         assert options.ap_probability
         ap = CoinFlipDetAP(options.ap_probability)
         print("CoinFlipDet AP with probability:", options.ap_probability)
-    elif ap_id == "wrreject":
+    elif ap_id == 'wrreject':
         assert scaled_write_mbps != 0
         ap = WriteRateRejectAP(scaled_write_mbps, utils.BlkAccess.ALIGNMENT)
-    elif ap_id == "acceptall":
+    elif ap_id == 'acceptall':
         ap = AcceptAll()
     else:
         raise NotImplementedError(ap_id)
