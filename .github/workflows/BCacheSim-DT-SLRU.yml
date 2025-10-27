@@ -1,4 +1,4 @@
-name: BCacheSim-RejectX
+name: BCacheSim-DT-SLRU
 
 on:
     push:
@@ -18,7 +18,7 @@ env:
     PYTHON_VERSION: "3.11"
 
 jobs:
-    BCacheSim-RejectX:
+    BCacheSim-DT-SLRU:
         runs-on: ubuntu-latest
         strategy:
             max-parallel: 5
@@ -115,11 +115,11 @@ jobs:
             #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
             #     flake8 BCacheSim/cachesim --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-            - name: Run baseline RejectX simulation (4 mins)
-              timeout-minutes: 10
+            - name: Run DT-SLRU simulation (2 mins)
+              timeout-minutes: 5
               run: |
                   source $CONDA/etc/profile.d/conda.sh
                   conda activate ${{ env.CONDA_ENV_NAME }}
-                  echo "Running baseline RejectX simulation..."
-                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/rejectx/config.json
-                  echo "✓ RejectX simulation completed successfully"
+                  echo "Running DT-SLRU simulation..."
+                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json
+                  echo "✓ DT-SLRU simulation completed successfully"
