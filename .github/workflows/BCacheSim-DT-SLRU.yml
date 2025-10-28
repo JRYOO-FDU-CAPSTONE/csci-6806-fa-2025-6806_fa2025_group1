@@ -115,8 +115,8 @@ jobs:
             #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
             #     flake8 BCacheSim/cachesim --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-            - name: Run DT-SLRU simulation (2 mins)
-              timeout-minutes: 5
+            - name: Run DT-SLRU (Segmented LRU with DT-aware promotion) simulation (3 mins)
+              timeout-minutes: 6
               run: |
                   source $CONDA/etc/profile.d/conda.sh
                   conda activate ${{ env.CONDA_ENV_NAME }}
