@@ -1,8 +1,13 @@
 # Artifact for Baleen (FAST 2024)
 
+[![BCacheSim-RejectX](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-RejectX.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-RejectX.yml)
+[![BCacheSim-LRU](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-LRU.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-LRU.yml)
+[![BCacheSim-DT-SLRU](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-DT-SLRU.yml/badge.svg?branch=main)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-DT-SLRU.yml)
+[![BCacheSim-EDE](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-EDE.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-EDE.yml)
+
 _Baleen: ML Admission & Prefetching for Flash Caches_
 
-_[Paper (Preprint)](https://wonglkd.fi-de.net/papers/Baleen-FAST24.pdf) | [Code](https://github.com/wonglkd/BCacheSim/) | [Data](https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/) | [Video walkthrough](https://www.tiny.cc/BaleenArtifactYT) | [Reproduce on Chameleon](https://www.chameleoncloud.org/experiment/share/aa6fb454-6452-4fc8-994a-b028bfc3c82d)_ 
+_[Paper (Preprint)](https://wonglkd.fi-de.net/papers/Baleen-FAST24.pdf) | [Code](https://github.com/wonglkd/BCacheSim/) | [Data](https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/) | [Video walkthrough](https://www.tiny.cc/BaleenArtifactYT) | [Reproduce on Chameleon](https://www.chameleoncloud.org/experiment/share/aa6fb454-6452-4fc8-994a-b028bfc3c82d)_
 
 This repository is targeted at those seeking to reproduce the results found in the Baleen paper and contains a frozen copy of the code.
 If you are looking to use Baleen, please go to https://github.com/wonglkd/BCacheSim/ for the latest version.
