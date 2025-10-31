@@ -96,7 +96,22 @@ _Time estimate: 30 minutes (10 mins interactive)._
 ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/baleen/prefetch_ml-on-partial-hit/config.json
 ```
 
-3. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
+3. Scheme E0 - Baseline: admission policy `acceptall` and eviction policy `LRU`, prefetching disabled. (~2 mins)
+```
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/lru/config.json
+```
+
+4. Scheme E1 - DT-SLRU (Segmented LRU with DT-aware promotion): admission policy `acceptall` and eviction polilcy `DT-SLRU`, prefetching disabled. (~2 mins)
+```
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json
+```
+
+Run with DT-per-byte (𝜏_DT) set to 0.007:
+```
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score 0.007 --ignore-existing
+```
+
+5. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
 
 
 ## Detailed Instructions
