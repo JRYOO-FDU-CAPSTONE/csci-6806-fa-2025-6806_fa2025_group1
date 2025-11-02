@@ -1,0 +1,331 @@
+name: BCacheSim-Eviction-Policy
+
+on:
+    push:
+        branches: ["main", "dev"]
+        paths:
+            - "BCacheSim/**"
+            - "!BCacheSim/README.md"
+    pull_request:
+        branches: ["main", "dev"]
+        paths:
+            - "BCacheSim/**"
+            - "!BCacheSim/README.md"
+    workflow_dispatch:
+
+env:
+    CONDA_ENV_NAME: cachelib-py-3.11
+    PYTHON_VERSION: "3.11"
+
+jobs:
+    LRU:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash -el {0}
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v3
+              with:
+                  python-version: "3.11"
+
+            - name: Cache trace data
+              uses: actions/cache@v3
+              id: trace-cache
+              with:
+                  path: |
+                      data/storage_0.1.tar.gz
+                      data/tectonic/
+                  key: ${{ runner.os }}-trace-data-${{ hashFiles('data/get-tectonic.sh') }}
+                  restore-keys: |
+                      ${{ runner.os }}-trace-data-
+
+            - name: Download trace files
+              working-directory: data
+              if: steps.trace-cache.outputs.cache-hit != 'true'
+              run: |
+                  if [ ! -f storage_0.1.tar.gz ] || [ ! -d tectonic ]; then
+                    echo "Downloading trace files..."
+                    wget https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/storage_0.1.tar.gz &&
+                    mkdir tectonic &&
+                    tar xvf storage_0.1.tar.gz -C tectonic --strip-components=1 &&
+                    echo "Trace files extracted"
+                  else
+                    echo "Trace files already cached, skipping download..."
+                  fi
+                  ls -lah
+
+            - name: Add conda to system path
+              run: |
+                  # $CONDA is an environment variable pointing to the root of the miniconda directory
+                  echo $CONDA/bin >> $GITHUB_PATH
+
+            - name: Verify Conda environment
+              run: |
+                  conda info
+                  conda list
+                  python --version
+                  which python
+                  echo "CONDA environment activated: $CONDA_DEFAULT_ENV"
+
+            - name: Cache Conda environment
+              uses: actions/cache@v3
+              id: conda-cache
+              with:
+                  path: |
+                      /usr/share/miniconda/envs/${{ env.CONDA_ENV_NAME }}
+                  key: ${{ runner.os }}-conda-${{ hashFiles('BCacheSim/install/env_cachelib-py-3.11.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-conda-
+
+            - name: Install dependencies
+              if: steps.conda-cache.outputs.cache-hit != 'true'
+              run: |
+                  conda env update --file BCacheSim/install/env_cachelib-py-3.11.yaml --name ${{ env.CONDA_ENV_NAME }}
+
+            - name: Cache Pip
+              uses: actions/cache@v3
+              id: pip-cache
+              with:
+                  path: |
+                      ~/.cache/pip/
+                  key: ${{ runner.os }}-pip-${{ hashFiles('BCacheSim/install/requirements.txt') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pip-
+
+            - name: Install additional dependencies
+              if: steps.pip-cache.outputs.cache-hit != 'true'
+              run: |
+                  source $CONDA/etc/profile.d/conda.sh
+                  conda activate ${{ env.CONDA_ENV_NAME }}
+                  # pip install --upgrade pip
+                  if [ -f BCacheSim/install/requirements.txt ]; then
+                    pip install -r BCacheSim/install/requirements.txt
+                  fi
+
+            # - name: Lint with flake8
+            #   run: |
+            #     conda install flake8
+            #     # stop the build if there are Python syntax errors or undefined names
+            #     flake8 BCacheSim/cachesim --count --select=E9,F63,F7,F82 --show-source --statistics
+            #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+            #     flake8 BCacheSim/cachesim --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+            - name: Run baseline LRU simulation (3 mins)
+              timeout-minutes: 6
+              run: |
+                  source $CONDA/etc/profile.d/conda.sh
+                  conda activate ${{ env.CONDA_ENV_NAME }}
+                  echo "Running baseline LRU simulation..."
+                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/lru/config.json
+                  echo "✓ LRU simulation completed successfully"
+
+    DT-SLRU:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash -el {0}
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v3
+              with:
+                  python-version: "3.11"
+
+            - name: Cache trace data
+              uses: actions/cache@v3
+              id: trace-cache
+              with:
+                  path: |
+                      data/storage_0.1.tar.gz
+                      data/tectonic/
+                  key: ${{ runner.os }}-trace-data-${{ hashFiles('data/get-tectonic.sh') }}
+                  restore-keys: |
+                      ${{ runner.os }}-trace-data-
+
+            - name: Download trace files
+              working-directory: data
+              if: steps.trace-cache.outputs.cache-hit != 'true'
+              run: |
+                  if [ ! -f storage_0.1.tar.gz ] || [ ! -d tectonic ]; then
+                    echo "Downloading trace files..."
+                    wget https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/storage_0.1.tar.gz &&
+                    mkdir tectonic &&
+                    tar xvf storage_0.1.tar.gz -C tectonic --strip-components=1 &&
+                    echo "Trace files extracted"
+                  else
+                    echo "Trace files already cached, skipping download..."
+                  fi
+                  ls -lah
+
+            - name: Add conda to system path
+              run: |
+                  # $CONDA is an environment variable pointing to the root of the miniconda directory
+                  echo $CONDA/bin >> $GITHUB_PATH
+
+            - name: Verify Conda environment
+              run: |
+                  conda info
+                  conda list
+                  python --version
+                  which python
+                  echo "CONDA environment activated: $CONDA_DEFAULT_ENV"
+
+            - name: Cache Conda environment
+              uses: actions/cache@v3
+              id: conda-cache
+              with:
+                  path: |
+                      /usr/share/miniconda/envs/${{ env.CONDA_ENV_NAME }}
+                  key: ${{ runner.os }}-conda-${{ hashFiles('BCacheSim/install/env_cachelib-py-3.11.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-conda-
+
+            - name: Install dependencies
+              if: steps.conda-cache.outputs.cache-hit != 'true'
+              run: |
+                  conda env update --file BCacheSim/install/env_cachelib-py-3.11.yaml --name ${{ env.CONDA_ENV_NAME }}
+
+            - name: Cache Pip
+              uses: actions/cache@v3
+              id: pip-cache
+              with:
+                  path: |
+                      ~/.cache/pip/
+                  key: ${{ runner.os }}-pip-${{ hashFiles('BCacheSim/install/requirements.txt') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pip-
+
+            - name: Install additional dependencies
+              if: steps.pip-cache.outputs.cache-hit != 'true'
+              run: |
+                  source $CONDA/etc/profile.d/conda.sh
+                  conda activate ${{ env.CONDA_ENV_NAME }}
+                  # pip install --upgrade pip
+                  if [ -f BCacheSim/install/requirements.txt ]; then
+                    pip install -r BCacheSim/install/requirements.txt
+                  fi
+
+            # - name: Lint with flake8
+            #   run: |
+            #     conda install flake8
+            #     # stop the build if there are Python syntax errors or undefined names
+            #     flake8 BCacheSim/cachesim --count --select=E9,F63,F7,F82 --show-source --statistics
+            #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+            #     flake8 BCacheSim/cachesim --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+            - name: Run DT-SLRU (Segmented LRU with DT-aware promotion) simulation (3 mins)
+              timeout-minutes: 6
+              run: |
+                  source $CONDA/etc/profile.d/conda.sh
+                  conda activate ${{ env.CONDA_ENV_NAME }}
+                  echo "Running DT-SLRU simulation..."
+                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json
+                  echo "✓ DT-SLRU simulation completed successfully"
+
+    EDE:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash -el {0}
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v3
+              with:
+                  python-version: "3.11"
+
+            - name: Cache trace data
+              uses: actions/cache@v3
+              id: trace-cache
+              with:
+                  path: |
+                      data/storage_0.1.tar.gz
+                      data/tectonic/
+                  key: ${{ runner.os }}-trace-data-${{ hashFiles('data/get-tectonic.sh') }}
+                  restore-keys: |
+                      ${{ runner.os }}-trace-data-
+
+            - name: Download trace files
+              working-directory: data
+              if: steps.trace-cache.outputs.cache-hit != 'true'
+              run: |
+                  if [ ! -f storage_0.1.tar.gz ] || [ ! -d tectonic ]; then
+                    echo "Downloading trace files..."
+                    wget https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/storage_0.1.tar.gz &&
+                    mkdir tectonic &&
+                    tar xvf storage_0.1.tar.gz -C tectonic --strip-components=1 &&
+                    echo "Trace files extracted"
+                  else
+                    echo "Trace files already cached, skipping download..."
+                  fi
+                  ls -lah
+
+            - name: Add conda to system path
+              run: |
+                  # $CONDA is an environment variable pointing to the root of the miniconda directory
+                  echo $CONDA/bin >> $GITHUB_PATH
+
+            - name: Verify Conda environment
+              run: |
+                  conda info
+                  conda list
+                  python --version
+                  which python
+                  echo "CONDA environment activated: $CONDA_DEFAULT_ENV"
+
+            - name: Cache Conda environment
+              uses: actions/cache@v3
+              id: conda-cache
+              with:
+                  path: |
+                      /usr/share/miniconda/envs/${{ env.CONDA_ENV_NAME }}
+                  key: ${{ runner.os }}-conda-${{ hashFiles('BCacheSim/install/env_cachelib-py-3.11.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-conda-
+
+            - name: Install dependencies
+              if: steps.conda-cache.outputs.cache-hit != 'true'
+              run: |
+                  conda env update --file BCacheSim/install/env_cachelib-py-3.11.yaml --name ${{ env.CONDA_ENV_NAME }}
+
+            - name: Cache Pip
+              uses: actions/cache@v3
+              id: pip-cache
+              with:
+                  path: |
+                      ~/.cache/pip/
+                  key: ${{ runner.os }}-pip-${{ hashFiles('BCacheSim/install/requirements.txt') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pip-
+
+            - name: Install additional dependencies
+              if: steps.pip-cache.outputs.cache-hit != 'true'
+              run: |
+                  source $CONDA/etc/profile.d/conda.sh
+                  conda activate ${{ env.CONDA_ENV_NAME }}
+                  # pip install --upgrade pip
+                  if [ -f BCacheSim/install/requirements.txt ]; then
+                    pip install -r BCacheSim/install/requirements.txt
+                  fi
+
+            # - name: Lint with flake8
+            #   run: |
+            #     conda install flake8
+            #     # stop the build if there are Python syntax errors or undefined names
+            #     flake8 BCacheSim/cachesim --count --select=E9,F63,F7,F82 --show-source --statistics
+            #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+            #     flake8 BCacheSim/cachesim --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+            - name: Run EDE (Episode-Deadline Eviction) simulation (10 mins)
+              timeout-minutes: 15
+              run: |
+                  source $CONDA/etc/profile.d/conda.sh
+                  conda activate ${{ env.CONDA_ENV_NAME }}
+                  echo "Running baseline RejectX simulation..."
+                  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
+                  echo "✓ EDE simulation completed successfully"
