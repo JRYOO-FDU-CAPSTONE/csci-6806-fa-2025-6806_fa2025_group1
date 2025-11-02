@@ -1,9 +1,7 @@
 # Artifact for Baleen (FAST 2024)
 
 [![BCacheSim-RejectX](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-RejectX.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-RejectX.yml)
-[![BCacheSim-LRU](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-LRU.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-LRU.yml)
-[![BCacheSim-DT-SLRU](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-DT-SLRU.yml/badge.svg?branch=main)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-DT-SLRU.yml)
-[![BCacheSim-EDE](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-EDE.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-EDE.yml)
+[![BCacheSim-Eviction-Policy](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-Eviction-Policy.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-Eviction-Policy.yml)
 
 _Baleen: ML Admission & Prefetching for Flash Caches_
 
