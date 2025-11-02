@@ -109,7 +109,20 @@ Run with DT-per-byte (𝜏_DT) set to 0.007:
 ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score 0.007 --ignore-existing
 ```
 
-5. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
+5. Scheme E2 - EDE (Episode-Deadline Eviction): admission policy acceptall and eviction polilcy EDE, prefetching disabled. (~9 mins)
+```
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
+```
+
+Generate perf stats for EDE with protected cap factor from 0.0 ~ 0.9, run: (~90 mins)
+```
+for i in `seq 0 9`;
+do
+  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ignore-existing --ede-protected-cap 0.${i};
+done
+```
+
+6. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
 
 
 ## Detailed Instructions
