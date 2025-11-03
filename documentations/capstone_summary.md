@@ -21,3 +21,13 @@ Traditional policies such as RejectX and DT-SLRU address these trade-offs heuris
 Baleen proposes an ML-based approach that redefines caching optimization using an **episode-based model** and focuses on **Disk-head Time (DT)** - a more accurate measure of backend utilization than hit rate or byte miss rate.
 
 ---
+
+## 3. Background
+
+Our first stage (A1) focused on understanding flash cache fundamentals and the DT metric, which is the time a disk head spends serving backend requests.  
+We studied how Peak DT determines storage capacity requirements, and why minimizing Peak DT reduces both latency and infrastructure cost.
+
+We also explored the episode model, which treats each cache residency as a single unit, reflecting the real cost of a flash admission more precisely than hit-rate–based metrics.  
+This model forms the foundation for Baleen’s offline Optimal Admission Policy (OPT), used to train ML models that imitate OPT decisions while adhering to flash write-rate limits.
+
+---
