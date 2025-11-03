@@ -38,5 +38,5 @@
     "log_decisions": false,
     "log_evictions": false,
     "log_episodes": false,
-    "eviction_policy": "ede"
+    "eviction_policy": "EDE"
 }
