@@ -125,6 +125,24 @@ done
 6. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
 
 
+Generate perf stats for DT-SLRU with `dt-per-byte` 0.0002, 0.00265, 0.0051, 0.00755, 0.01 with even spaced: +0.00245
+
+```
+for i in 0.0002 0.00265 0.0051 0.00755 0.01;
+do
+  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score $i --ignore-existing;
+done
+```
+
+Generate perf stats for DT-SLRU with `dt-per-byte` 0.0002, 0.00053, 0.00141, 0.00376, 0.01 with logarithmically spaced: -3.699 to -2, +0.4247 (-3.2743, -2.8496, -2.4249)
+
+```
+for i in 0.0002 0.00053 0.00141 0.00376 0.01;
+do
+  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score $i --ignore-existing;
+done
+```
+
 ## Detailed Instructions
 
 This section assumes you have completed the 'Getting Started' section and have
