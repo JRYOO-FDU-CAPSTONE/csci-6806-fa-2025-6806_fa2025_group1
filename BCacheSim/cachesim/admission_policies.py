@@ -248,7 +248,7 @@ class FlashieldProbAP(FlashieldAP):
 
     def __repr__(self):
         return f"{self.name}(n={self.n}, threshold={self.threshold})"
-
+    
 
 class CoinFlipAP(AP):
     def __init__(self, probability):

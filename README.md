@@ -1,11 +1,8 @@
 # Artifact for Baleen (FAST 2024)
 
-[![BCacheSim-RejectX](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-RejectX.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-RejectX.yml)
-[![BCacheSim-Eviction-Policy](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-Eviction-Policy.yml/badge.svg)](https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1/actions/workflows/BCacheSim-Eviction-Policy.yml)
-
 _Baleen: ML Admission & Prefetching for Flash Caches_
 
-_[Paper (Preprint)](https://wonglkd.fi-de.net/papers/Baleen-FAST24.pdf) | [Code](https://github.com/wonglkd/BCacheSim/) | [Data](https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/) | [Video walkthrough](https://www.tiny.cc/BaleenArtifactYT) | [Reproduce on Chameleon](https://www.chameleoncloud.org/experiment/share/aa6fb454-6452-4fc8-994a-b028bfc3c82d)_
+_[Paper (Preprint)](https://wonglkd.fi-de.net/papers/Baleen-FAST24.pdf) | [Code](https://github.com/wonglkd/BCacheSim/) | [Data](https://ftp.pdl.cmu.edu/pub/datasets/Baleen24/) | [Video walkthrough](https://www.tiny.cc/BaleenArtifactYT) | [Reproduce on Chameleon](https://www.chameleoncloud.org/experiment/share/aa6fb454-6452-4fc8-994a-b028bfc3c82d)_ 
 
 This repository is targeted at those seeking to reproduce the results found in the Baleen paper and contains a frozen copy of the code.
 If you are looking to use Baleen, please go to https://github.com/wonglkd/BCacheSim/ for the latest version.
@@ -94,71 +91,8 @@ _Time estimate: 30 minutes (10 mins interactive)._
 ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/baleen/prefetch_ml-on-partial-hit/config.json
 ```
 
-3. Scheme E0 - Baseline: admission policy `acceptall` and eviction policy `LRU`, prefetching disabled. (~2 mins)
-```
-./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/lru/config.json
-```
+3. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
 
-4. Scheme E1 - DT-SLRU (Segmented LRU with DT-aware promotion): admission policy `acceptall` and eviction polilcy `DT-SLRU`, prefetching disabled. (~2 mins)
-```
-./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json
-```
-
-Run with DT-per-byte (𝜏_DT) set to 0.007:
-```
-./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score 0.007 --ignore-existing
-```
-
-5. Scheme E2 - EDE (Episode-Deadline Eviction): admission policy acceptall and eviction polilcy EDE, prefetching disabled. (~9 mins)
-```
-./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
-```
-
-Generate perf stats for EDE with protected cap factor from 0.0 ~ 0.9, run: (~90 mins)
-```
-for i in `seq 0 9`;
-do
-  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ignore-existing --ede-protected-cap 0.${i};
-done
-```
-
-6. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
-
-### Do DT-SLRU related experiment
-
-Generate perf stats for DT-SLRU with `dt-per-byte` 0.0002, 0.00265, 0.0051, 0.00755, 0.01 with even spaced: +0.00245
-
-```
-for i in 0.0002 0.00265 0.0051 0.00755 0.01;
-do
-  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score $i --ignore-existing;
-done
-```
-
-Generate perf stats for DT-SLRU with `dt-per-byte` 0.0002, 0.00053, 0.00141, 0.00376, 0.01 with logarithmically spaced: -3.699 to -2, +0.4247 (-3.2743, -2.8496, -2.4249)
-
-```
-for i in 0.0002 0.00053 0.00141 0.00376 0.01;
-do
-  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score $i --ignore-existing;
-done
-```
-
-### Do EDE related experiment
-
-Generate perf stats for EDE with `ede-protected-cap` from 0.1 to 0.9:
-
-```
-for i in `seq 1 9`; do ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ignore-existing --ede-protected-cap 0.${i}; done
-```
-
-Generate perf stats for EDE with `ede-alpha-tti` from 0.1 to 0.9:
-
-```
-for i in `seq 1 9`; do ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ignore-existing --ede-alpha-tti 0.${i}; done
-```
-
-Use [notebooks/example/A5-Ablation.ipynb](notebooks/example/A5-Ablation.ipynb) to view and plot results.
 
 ## Detailed Instructions
 

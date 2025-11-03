@@ -1,0 +1,3 @@
+[submodule "BCacheSim"]
+	path = BCacheSim
+	url = https://github.com/wonglkd/BCacheSim.git

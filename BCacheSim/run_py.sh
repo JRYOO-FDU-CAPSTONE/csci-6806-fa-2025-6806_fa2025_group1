@@ -14,7 +14,7 @@ ARGS=${@:2}
 
 case "$PYTHON" in
     pypy) PYTHON_BIN="pypy" ;;
-    py) PYTHON_BIN="python" ;;
+    py) PYTHON_BIN="python3" ;;
     *) echo "Unknown PYTHON: $PYTHON"; exit 1;
 esac
 
