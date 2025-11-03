@@ -11,7 +11,7 @@ class DynamicFeatures:
     # revised bloom filter implementation: record number of occurrence
     # instead of "has occured" flag
 
-    def __init__(self, hours, granularity="chunk", hr_unit=HOUR_IN_SECONDS):
+    def __init__(self, hours, granularity='chunk', hr_unit=HOUR_IN_SECONDS):
         self.history = deque()  # queue broken down by hour slots.
         self.timestamps = deque()  # timestamps in seconds
         self.hours = hours
@@ -20,7 +20,7 @@ class DynamicFeatures:
         self.hr_unit = hr_unit
 
     def _key(self, key):
-        if self.granularity.startswith("block") and type(key) != int and len(key) == 2:
+        if self.granularity.startswith('block') and type(key) != int and len(key) == 2:
             return key[0]
         return key
 

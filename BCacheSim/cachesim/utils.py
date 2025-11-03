@@ -9,7 +9,6 @@ import subprocess
 import hashlib
 import itertools
 import json
-
 # import jsonpickle
 import sys
 import time
@@ -20,24 +19,15 @@ from .legacy_utils import read_processed_file_with_logical_ts  # noqa: F401
 from .legacy_utils import GET_OPS, PUT_OPS, get_output_suffix  # noqa: F401
 
 
-def stream_processed_accesses(
-    f, *, region=None, input_file_name=None, sample_ratio=None, start=None, **kwargs
-):
+def stream_processed_accesses(f, *, region=None, input_file_name=None, sample_ratio=None, start=None, **kwargs):
     # memoize
     assert os.path.exists(f), f"{f} does not exist"
     filehash = subprocess.check_output(f"md5sum {f}", shell=True).split()[0]
     # import platform
     # pywhich = platform.python_implementation()
-    kwargs_hash = hashlib.md5(
-        json.dumps(kwargs, sort_keys=True).encode("utf-8")
-    ).hexdigest()[-6:]
-    cached_filename = f"/tmp/cache-sim-accesses-{region}_{input_file_name}_{filehash[-6:].decode()}_{kwargs_hash}_batched.pkl"
-    if (
-        not os.path.exists(cached_filename)
-        or os.path.getmtime(cached_filename) <= os.path.getmtime(__file__)
-        or os.path.getmtime(cached_filename)
-        <= os.path.getmtime(__file__.replace("utils", "legacy_utils"))
-    ):
+    kwargs_hash = hashlib.md5(json.dumps(kwargs, sort_keys=True).encode('utf-8')).hexdigest()[-6:]
+    cached_filename = f'/tmp/cache-sim-accesses-{region}_{input_file_name}_{filehash[-6:].decode()}_{kwargs_hash}_batched.pkl'
+    if not os.path.exists(cached_filename) or os.path.getmtime(cached_filename) <= os.path.getmtime(__file__) or os.path.getmtime(cached_filename) <= os.path.getmtime(__file__.replace("utils", "legacy_utils")):
         if os.path.exists(cached_filename):
             mtime = os.path.getmtime(cached_filename)
         else:
@@ -50,26 +40,23 @@ def stream_processed_accesses(
         assert total_iops == total_iops_get + total_iops_put
         trace_duration_secs = round(end_ts - start_ts, 2)
         stats = {
-            "total_iops": total_iops,
-            "total_iops_get": total_iops_get,
-            "total_iops_put": total_iops_put,
-            "max_key": max_key,
-            "trace_duration_secs": trace_duration_secs,
-            "start_ts": start_ts,
-            "end_ts": end_ts,
-            "filename": f,
-            "trace_hash": filehash,
-            "kwargs_hash": kwargs_hash,
-            "kwargs": kwargs,
+            'total_iops': total_iops,
+            'total_iops_get': total_iops_get,
+            'total_iops_put': total_iops_put,
+            'max_key': max_key,
+            'trace_duration_secs': trace_duration_secs,
+            'start_ts': start_ts,
+            'end_ts': end_ts,
+            'filename': f,
+            'trace_hash': filehash,
+            'kwargs_hash': kwargs_hash,
+            'kwargs': kwargs,
         }
-        if (
-            not os.path.exists(cached_filename)
-            or os.path.getmtime(cached_filename) == mtime
-        ):
+        if not os.path.exists(cached_filename) or os.path.getmtime(cached_filename) == mtime:
             if os.path.exists(cached_filename):
                 os.remove(cached_filename)
             try:
-                with open(cached_filename, "wb") as f:
+                with open(cached_filename, 'wb') as f:
                     pickle.dump(stats, f, protocol=4)
                     batch = []
                     for acc in accesses:
@@ -92,7 +79,7 @@ def stream_processed_accesses(
 
 
 def stream_pickle(filename):
-    with open(filename, "rb") as f:
+    with open(filename, 'rb') as f:
         while f.peek(1):
             try:
                 # Note: cannot use same unpickler, as some info is left over.
@@ -107,7 +94,6 @@ def stream_pickle(filename):
                     os.unlink(filename)
                     print(f"Deleting cached {filename}")
                 import traceback
-
                 traceback.print_exc()
                 print(f)
                 raise
@@ -131,40 +117,33 @@ def pct(x, y):
 
 
 def mb_per_sec(chunks, time_secs, sample_ratio):
-    return safe_div(
-        chunks * BlkAccess.ALIGNMENT * 100.0, time_secs * 1024 * 1024 * sample_ratio
-    )
+    return safe_div(chunks * BlkAccess.ALIGNMENT * 100.0,
+                    time_secs * 1024 * 1024 * sample_ratio)
 
 
 def compress_load(filename):
-    if ".shelve" in filename:
+    if '.shelve' in filename:
         raise NotImplementedError
-        return shelve.open(filename.replace(".shelve.db", ".shelve"), flag="r")
+        return shelve.open(filename.replace(".shelve.db", ".shelve"), flag='r')
     try:
         import compress_pickle
         from retry.api import retry_call
-
-        return retry_call(
-            compress_pickle.load,
-            fargs=[filename],
-            exceptions=(PermissionError, EOFError),
-            delay=1,
-            jitter=1,
-            tries=3,
-        )
+        return retry_call(compress_pickle.load, fargs=[filename],
+                          exceptions=(PermissionError, EOFError),
+                          delay=1, jitter=1, tries=3)
     except ImportError:
-        if filename.endswith(".pkl.gz"):
-            with gzip.GzipFile(filename, "rb") as f:
+        if filename.endswith('.pkl.gz'):
+            with gzip.GzipFile(filename, 'rb') as f:
                 return pickle.load(f)
-        elif filename.endswith(".pkl"):
-            with open(filename, "rb") as f:
+        elif filename.endswith('.pkl'):
+            with open(filename, 'rb') as f:
                 return pickle.load(f)
         else:
             raise ValueError
 
 
 def run_length_encode(ids):
-    if len(ids) == max(ids) - min(ids) + 1:
+    if len(ids) == max(ids)-min(ids)+1:
         return [[min(ids), max(ids)]]
     ret = [[ids[0], ids[0]]]
     for idx in ids[1:]:
@@ -183,6 +162,7 @@ def DEBUG_FLAG():
 def stringify_keys(d):
     """Convert a dict's keys to strings if they are not."""
     for key in list(d):
+
         # check inner dict
         if isinstance(d[key], dict):
             value = stringify_keys(d[key])
@@ -213,8 +193,7 @@ def stringify_keys(d):
 def memory_usage():
     try:
         import psutil
-
-        return psutil.Process().memory_info().rss / 1024**3
+        return psutil.Process().memory_info().rss / 1024 ** 3
     except ImportError:
         return 0
 
@@ -260,7 +239,7 @@ class Stats(object):
 
     def _key(self, k_):
         if isinstance(k_, list) or isinstance(k_, tuple):
-            k_ = "/".join(map(str, k_))
+            k_ = '/'.join(map(str, k_))
         return k_
 
     def bump(self, key, v=1, init=0):
@@ -289,7 +268,7 @@ class Stats(object):
             return self.batches[key]
         else:
             if init is None:
-                init = [0] * (self.idx + 1) if key.endswith("_stats") else 0
+                init = [0] * (self.idx + 1) if key.endswith('_stats') else 0
             return init
 
     def append(self, key, v, init=0):
@@ -313,7 +292,7 @@ class Stats(object):
 
     def last_span(self, key, **kwargs):
         key = self._key(key)
-        return self.span(key, i=-1 if key + "_stats" in self.batches else -2, **kwargs)
+        return self.span(key, i=-1 if key+"_stats" in self.batches else -2, **kwargs)
 
     def span(self, key, fmt=None, init=0, i=None):
         """Used before checkpoint - takes the current value"""
@@ -364,14 +343,14 @@ ods = Stats()
 
 def key_refmt(key):
     block_id, chunk_id = key
-    return f"{block_id}|#|body-0-{chunk_id - 1}"
+    return f"{block_id}|#|body-0-{chunk_id-1}"
 
 
 def LOG_REQ(namespace, key, key_ts, op, result=None):
     if "--log-req" not in sys.argv:
         return
     key2 = key_refmt(key)
-    log_str = f"{namespace} T= {key_ts.logical + 1} {op} {key2}"
+    log_str = f"{namespace} T= {key_ts.logical+1} {op} {key2}"
     if result:
         log_str += f" {result}"
     print(log_str)
@@ -382,7 +361,7 @@ def LOG_IOPS(ts, block_id, is_hit, chunk_hit):
         return
     is_hit = int(is_hit)
     chunk_hit = int(chunk_hit)
-    print(f"IOPS T= {ts.logical + 1} GET {block_id} {chunk_hit} {is_hit}")
+    print(f"IOPS T= {ts.logical+1} GET {block_id} {chunk_hit} {is_hit}")
 
 
 def LOG_DEBUG(*args, **kwargs):
@@ -395,7 +374,7 @@ def capitalize_and_leave_existing(txt):
 
 
 def to_camelcase(txt):
-    return "".join(capitalize_and_leave_existing(w) for w in txt.split("_"))
+    return ''.join(capitalize_and_leave_existing(w) for w in txt.split('_'))
 
 
 def rm_missing_ok(filename):
@@ -473,18 +452,11 @@ def closest_row(df_, col, val):
     return df_.iloc[(df_[col] - val).abs().idxmin()]
 
 
-def fmt_dur(
-    dur_secs,
-    smallest=None,
-    small_fmt="{:.2g}",
-    fmt="{:g}",
-    sep=" ",
-    sep2=" ",
-    short=False,
-    top_only=False,
-    verbose=None,
-    v=5,
-):
+def fmt_dur(dur_secs,
+            smallest=None,
+            small_fmt='{:.2g}',
+            fmt='{:g}',
+            sep=' ', sep2=' ', short=False, top_only=False, verbose=None, v=5):
     """
     verbose = 0: 1d
     verbose = 1: 1d1h1m1s
@@ -499,12 +471,12 @@ def fmt_dur(
         if verbose == 0:
             top_only = True
         if verbose <= 1:
-            sep = ""
+            sep = ''
         if verbose <= 2:
-            sep2 = ""
+            sep2 = ''
             short = True
-    label = ["secs", "mins", "hrs", "days"]
-    divr = [60, 60, 24, dur_secs + 1]
+    label = ['secs', 'mins', 'hrs', 'days']
+    divr = [60, 60, 24, dur_secs+1]
     start = 0
     if smallest:
         for i in range(len(divr)):
@@ -526,7 +498,7 @@ def fmt_dur(
                 small = small_fmt.format(small)
             else:
                 small = fmt.format(small)
-            ret.append(f"{small}{sep2}{lx}")
+            ret.append(f'{small}{sep2}{lx}')
         if dur_secs == 0:
             break
     ret = list(reversed(ret))
@@ -536,7 +508,7 @@ def fmt_dur(
 
 
 class LockFile(object):
-    def __init__(self, filename, timeout=60 * 10):
+    def __init__(self, filename, timeout=60*10):
         self.filename = filename
         self.f = None
         self.timeout = timeout
@@ -545,10 +517,7 @@ class LockFile(object):
         return os.path.exists(self.filename)
 
     def stale(self):
-        return (
-            self.exists()
-            and time.time() - os.path.getmtime(self.filename) > self.timeout
-        )
+        return self.exists() and time.time() - os.path.getmtime(self.filename) > self.timeout
 
     def check(self, strict=False):
         if self.exists():
