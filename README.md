@@ -124,6 +124,41 @@ done
 
 6. Use [notebooks/example/example.ipynb](notebooks/example/example.ipynb) to view and plot results.
 
+### Do DT-SLRU related experiment
+
+Generate perf stats for DT-SLRU with `dt-per-byte` 0.0002, 0.00265, 0.0051, 0.00755, 0.01 with even spaced: +0.00245
+
+```
+for i in 0.0002 0.00265 0.0051 0.00755 0.01;
+do
+  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score $i --ignore-existing;
+done
+```
+
+Generate perf stats for DT-SLRU with `dt-per-byte` 0.0002, 0.00053, 0.00141, 0.00376, 0.01 with logarithmically spaced: -3.699 to -2, +0.4247 (-3.2743, -2.8496, -2.4249)
+
+```
+for i in 0.0002 0.00053 0.00141 0.00376 0.01;
+do
+  ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/dt-slru/config.json --dt-per-byte-score $i --ignore-existing;
+done
+```
+
+### Do EDE related experiment
+
+Generate perf stats for EDE with `ede-protected-cap` from 0.1 to 0.9:
+
+```
+for i in `seq 1 9`; do ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ignore-existing --ede-protected-cap 0.${i}; done
+```
+
+Generate perf stats for EDE with `ede-alpha-tti` from 0.1 to 0.9:
+
+```
+for i in `seq 1 9`; do ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ignore-existing --ede-alpha-tti 0.${i}; done
+```
+
+Use [notebooks/example/A5-Ablation.ipynb](notebooks/example/A5-Ablation.ipynb) to view and plot results.
 
 ## Detailed Instructions
 
