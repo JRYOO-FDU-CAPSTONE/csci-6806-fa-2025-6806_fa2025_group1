@@ -173,3 +173,48 @@ class DTSegmentedLRUPolicy(EvictionImpl):
             return next(iter(self.protected_segment))
         return None
 ```
+## Integration with BCacheSim
+
+### 1. QueueCache Integration
+
+The DT-SLRU policy would integrate with the existing [`QueueCache`](BCacheSim/cachesim/eviction_policies.py:630-1065) class:
+
+```python
+class QueueCache(EvictionPolicy):
+    def __init__(self, evictions_log, num_elems, ap, *, lru=True, **kwargs):
+        super().__init__(evictions_log, num_elems, **kwargs)
+        
+        if options.eviction_policy == 'dt-slru':
+            self.cache = DTSegmentedLRUPolicy(num_elems, 
+                                            protected_ratio=options.dt_slru_protected_ratio,
+                                            adaptation_interval=options.dt_slru_adapt_interval)
+        elif options.eviction_policy and options.eviction_policy.startswith('ttl'):
+            self.cache = TTLPolicy()
+        else:
+            self.cache = LRUPolicy()
+```
+
+### 2. Configuration Options
+
+Add DT-SLRU specific options to [`simulate_ap.py`](BCacheSim/cachesim/simulate_ap.py:20):
+
+```python
+parser.add_argument("--dt-slru-protected-ratio", type=float, default=0.8,
+                    help="Initial protected segment ratio for DT-SLRU")
+parser.add_argument("--dt-slru-adapt-interval", type=int, default=1000,
+                    help="Adaptation interval for DT-SLRU threshold")
+```
+
+### 3. Policy Selection
+
+Update the policy selection logic in [`sim_cache.py`](BCacheSim/cachesim/sim_cache.py:1496-1510):
+
+```python
+if options.eviction_policy == 'dt-slru':
+    cache = evictp.QueueCache(
+        None, num_cache_elems, ap,
+        lru=False,  # Use DT-SLRU instead
+        dynamic_features=dfeat,
+        options=options,
+        eviction_policy='dt-slru')
+```
