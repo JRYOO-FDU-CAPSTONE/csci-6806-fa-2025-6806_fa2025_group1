@@ -8,6 +8,14 @@ It has several key features that make it unique from the traditional cache simul
 
 # Disk-Head Time
 
+Disk-Head time is defined as time a disk spend on fulfilling the request on backend. It is one of the accurate metric for the storage system ultization than the traditional metric of hit rate and miss rate. The metric like hit rate and miss rate uses the count of hit and miss whenever there is a request for the service. Unlike this  Disk Head time calculates the total time spent on disk seek time, rotational delays and data transfer when request are served from the backend storage not from cache. 
+
+In this BcacheSim simulator, DT is used as main parameter which is taken in account for all admission and eviction policies which aims for the minimum Peak DT instead of only maximizing hit rates. Simulator is used to observe the peak DT over different parameters so it can be analyzed properly and which can help in the study of different cache policies and their impact.
+
 # ML-Guided Policies
 
-# Eviction Policies
+Ml-Guided pilicies is an approach made for efficient cache management using machine learning to make proper addmission and prefeteching decision to reduce Peak DT. It is very different from tradition heuristic based policies which is based on fixed threshold or rules, these Ml-guided policies are trained on episode based features to predict whether to admit the particular episode or exclude the episode so it can benefit the flash write cost. The ML-guided training is based on optimal addmission Policy (OPT) which can make addmission decisions and train ML models to utilize that optimal decision maintaing flash write constraints. 
+
+For this ML approach episode based model is used which treats each cache residency as a single logical unit instead of whole individual block of data. It is very useful for Ml model to learn the patterns about access sequence and make decision for optimizing the episode lifecycle. Being based on these ML model is implemented by simulator which predict which block are likely to be accessed in future which enable proactive admission of data before it is requested.
+
+The Ml guided approach is advantageous over traditional policies. It learns complex. non linear relationships between different patterns which helps to make optimal decision for caching and helps to achieve better performance.
