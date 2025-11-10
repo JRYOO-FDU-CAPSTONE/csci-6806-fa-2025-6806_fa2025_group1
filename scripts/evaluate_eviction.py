@@ -4,6 +4,9 @@ import contextlib
 import json
 import os
 import sys
+import threading
+import itertools
+import time
 from pathlib import Path
 
 from jsonargparse import ArgumentParser
@@ -13,6 +16,36 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from BCacheSim.cachesim import sim_cache, simulate_ap
+
+
+def show_spinner(stop_event, message="Running simulation"):
+    spinner = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
+    # Write directly to terminal file descriptor
+    tty = open('/dev/tty', 'w')
+    start_time = time.time()
+
+    while not stop_event.is_set():
+        elapsed = time.time() - start_time
+        hours, remainder = divmod(int(elapsed), 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        if hours > 0:
+            time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        else:
+            time_str = f"{minutes:02d}:{seconds:02d}"
+
+        # Blue spinner (\033[34m) and cyan time
+        tty.write(f'\r\033[34m{next(spinner)}\033[0m {message} ... \033[36m[{time_str}]\033[0m')
+        tty.flush()
+        time.sleep(0.1)
+
+    # Clear line
+    elapsed = time.time() - start_time
+    tty.write('\r\033[K')
+    tty.flush()
+    tty.close()
+
+    return elapsed
 
 
 def get_parser():
@@ -67,7 +100,7 @@ def load_config_for_policy(args):
             parser = simulate_ap.get_parser()
             args = parser.parse_args(["--config", config_path])
 
-            print(f"Loaded config from: \033[32m{config_path}\033[0m")
+            print(f"\033[32m✔\033[0m Loaded config from: \033[32m{config_path}\033[0m")
 
             # Merge config data into args
             # for key, value in config_data.items():
@@ -93,9 +126,11 @@ def load_config_for_policy(args):
 
 def main():
     args = get_parsed_args()
+    policy = args.policy
 
     args = load_config_for_policy(args)
     assert args.trace or args.tracefile
+
     if args.trace:
         args.tracefile = args.trace
     if args.config:
@@ -114,12 +149,46 @@ def main():
 
     stats = {"options": None, "results": None}
 
-    with contextlib.redirect_stdout(open(os.devnull, "w")):
+    # Start spinner
+    stop_spinner = threading.Event()
+    elapsed_time = [0]
+
+    def spinner_wrapper():
+        elapsed_time[0] = show_spinner(stop_spinner, f"Running eviction simulation for {policy}")
+
+    spinner_thread = threading.Thread(target=spinner_wrapper)
+    spinner_thread.start()
+
+    # Redirect stdout and stderr
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    sys.stdout = open(os.devnull, 'w')
+    sys.stderr = open(os.devnull, 'w')
+
+    try:
         stats = sim_cache.simulate_cache_driver(args)
+    finally:
+        # Restore
+        sys.stdout.close()
+        sys.stderr.close()
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
-    # print(stats)
+        # Stop spinner
+        stop_spinner.set()
+        spinner_thread.join()
 
-    print(stats["results"]["PeakServiceTimeUsed1"])
+    hours, remainder = divmod(int(elapsed_time[0]), 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if hours > 0:
+        time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    else:
+        time_str = f"{minutes:02d}:{seconds:02d}"
+
+    print(f"\033[32m✔ Simulation completed\033[0m in \033[36m{time_str}\033[0m")
+
+    print(f"\033[32m●\033[0m Peak DT ", {stats["results"]["PeakServiceTimeUsed1"]})
 
 
 if __name__ == "__main__":
