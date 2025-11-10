@@ -2,33 +2,31 @@ import copy
 import gc
 import json
 import os
-import random
-from collections import defaultdict
-import traceback
-import sys
-import time
 import pickle
 import pprint
+import random
+import sys
+import time
+import traceback
+from collections import defaultdict
 
 import compress_json
 import numpy as np
 import pandas as pd
 
+from ..episodic_analysis.episodes import service_time, st_to_util
 from . import admission_policies as aps
-from . import eviction_policies as evictp
 from . import dynamic_features as dyn_features
-from . import prefetchers
-from . import utils
-from .utils import LOG_IOPS, ods, fmt_dur
-
-from ..episodic_analysis.episodes import service_time
-from ..episodic_analysis.episodes import st_to_util
-from .ep_helpers import _lookup_episode
-from .ep_helpers import Timestamp
-from .ep_helpers import record_service_time_get
-from .ep_helpers import record_service_time_put
-from .ep_helpers import AccessPlus
-
+from . import eviction_policies as evictp
+from . import prefetchers, utils
+from .ep_helpers import (
+    AccessPlus,
+    Timestamp,
+    _lookup_episode,
+    record_service_time_get,
+    record_service_time_put,
+)
+from .utils import LOG_IOPS, fmt_dur, ods
 
 CACHE_LOCATIONS = {
     "": "",
@@ -1969,7 +1967,7 @@ def simulate_cache(
     # return csim.stats
 
 
-def simulate_cache_driver(options):
+def simulate_cache_driver(options) -> dict | None:
     start_time = time.time()
     print(pprint.pformat(options.as_dict()), flush=True)
     use_lru = not (options.fifo or options.lirs)
@@ -2243,3 +2241,5 @@ def simulate_cache_driver(options):
     lock.delete()
     utils.rm_missing_ok(lock.filename)
     print("Complete")
+
+    return logjson
