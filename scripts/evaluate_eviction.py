@@ -188,7 +188,8 @@ def main():
 
     print(f"\033[32m✔ Simulation completed\033[0m in \033[36m{time_str}\033[0m")
 
-    print(f"\033[32m●\033[0m Peak DT ", {stats["results"]["PeakServiceTimeUsed1"]})
+    peak_dt = stats["results"]["PeakServiceTimeUsed1"]
+    print(f"\033[33m●\033[0m Peak DT: {peak_dt} ms")
 
 
 if __name__ == "__main__":
