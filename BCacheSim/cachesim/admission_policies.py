@@ -301,7 +301,7 @@ class LearnedAP(AP):
         Xs = [x[:-3] if len(x) == 12 else x for x in Xs]
         features = np.array(Xs)
         # for x in Xs:
-        #     self.seen_before[tuple(x)] += 1    
+        #     self.seen_before[tuple(x)] += 1
         # TODO: Log and check for seen-before features
         # result:
         # dynF0 .. dynF11 lAD kf1 kf2 kf3 size
@@ -384,7 +384,7 @@ class TrainingEpisode(object):
 
     def add_access(self, acc):
         new_chunk_range = [min(self.chunk_range[0], acc.chunk_range[0]), max(self.chunk_range[1], acc.chunk_range[1])]
-        added_chunks = new_chunk_range[1] - new_chunk_range[0] - self.num_chunks 
+        added_chunks = new_chunk_range[1] - new_chunk_range[0] - self.num_chunks
         self.num_chunks = new_chunk_range[1] - new_chunk_range[0]
         self.chunk_range = new_chunk_range
         self.s["service_time_orig"] += service_time(1, acc.num_chunks)

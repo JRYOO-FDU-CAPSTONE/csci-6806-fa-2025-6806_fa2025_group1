@@ -1,3 +1,8 @@
 tmp/
 .ipynb_checkpoints
 notebooks/paper-figs/figs
+
+*.png
+*.pdf
+
+figs/

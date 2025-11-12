@@ -22,7 +22,7 @@
     "prefetch_when": "never",
     "prefetch_range": "episode",
     "admit_only_prefetches": false,
-    "output_dir": "runs/example/baseline",
+    "output_dir": "runs/example/lru",
     "override": false,
     "write_mbps": 0,
     "size_gb": 366.475,
