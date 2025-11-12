@@ -1999,13 +1999,16 @@ def simulate_cache_driver(options) -> dict | None:
     input_file_name = tracefile[: -len(".trace")].split("/")[-1]
     out_prefix = f"{output_dir}/{input_file_name}"
     # TODO: Make this be an argument
+    # if "dt_per_byte_score" in options:
     if "--dt-per-byte-score" in sys.argv:
         print(options.dt_per_byte_score)
         results_file = out_prefix + f"_{options.dt_per_byte_score}" + "_cache_perf.txt"
+    # elif "ede_protected_cap" in options:
     elif "--ede-protected-cap" in sys.argv:
         results_file = (
             out_prefix + f"_pcap_{options.ede_protected_cap}" + "_cache_perf.txt"
         )
+    # elif "ede_alpha_tti" in options:
     elif "--ede-alpha-tti" in sys.argv:
         results_file = out_prefix + f"_ewma_{options.ede_alpha_tti}" + "_cache_perf.txt"
     else:
