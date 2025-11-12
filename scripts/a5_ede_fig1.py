@@ -54,7 +54,9 @@ def show_spinner(stop_event, message="Running simulation"):
     return elapsed
 
 
-def run_simulation_with_alpha(alpha_tti, config_path="runs/example/ede/config.json", verbose=False):
+def run_simulation_with_alpha(
+    alpha_tti, config_path="runs/example/ede/config.json", verbose=False
+):
     """
     Run simulation with specified ede-alpha-tti parameter using subprocess
     """
@@ -75,9 +77,12 @@ def run_simulation_with_alpha(alpha_tti, config_path="runs/example/ede/config.js
     # Build command to run simulation in subprocess
     cmd = [
         sys.executable,
-        "-m", "BCacheSim.cachesim.simulate_ap",
-        "--config", config_path,
-        "--ede-alpha-tti", str(alpha_tti)
+        "-m",
+        "BCacheSim.cachesim.simulate_ap",
+        "--config",
+        config_path,
+        "--ede-alpha-tti",
+        str(alpha_tti),
     ]
 
     # Start spinner
@@ -101,13 +106,15 @@ def run_simulation_with_alpha(alpha_tti, config_path="runs/example/ede/config.js
                 cmd,
                 cwd=str(PROJECT_ROOT),
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
+                stderr=subprocess.DEVNULL,
             )
-        
+
         if result.returncode != 0:
-            print(f"\n\033[31m✗ Simulation failed with exit code {result.returncode}\033[0m")
+            print(
+                f"\n\033[31m✗ Simulation failed with exit code {result.returncode}\033[0m"
+            )
             sys.exit(1)
-            
+
     finally:
         # Stop spinner
         stop_spinner.set()
@@ -211,7 +218,7 @@ def main():
 
         # Create plot
         plt.plot(
-            ede_ewma_df["α_TTL"],
+            ede_ewma_df["α_TTI"],
             ede_ewma_df["PeakServiceTimeUsed1"],
             marker="x",
             linewidth=3,
@@ -220,8 +227,8 @@ def main():
         )
 
         plt.xticks(rotation=45)
-        plt.title("Peak DT vs. α_TTL (EWMA)")
-        plt.xlabel("α_TTL")
+        plt.title("Peak DT vs. α_TTI (EWMA)")
+        plt.xlabel("α_TTI")
         plt.ylabel("Peak DT (ms)")
         plt.grid(True)
         plt.legend(title="Eviction Policy")

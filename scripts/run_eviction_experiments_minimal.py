@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from jsonargparse import ArgumentParser
 
 # Add project to path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -16,6 +17,17 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import results module
 from BCacheSim.episodic_analysis.exps import results
+
+# Parse command line arguments
+parser = ArgumentParser(description="Load and plot eviction experiment results")
+parser.add_argument(
+    "-o",
+    "--output",
+    type=str,
+    default="output.png",
+    help="Output file path (supported formats: png, pdf, svg, jpg, jpeg)",
+)
+args = parser.parse_args()
 
 # Define result files
 resultfiles = {
@@ -58,6 +70,19 @@ plt.xlabel("Days")
 plt.ylabel("Utilization")
 plt.title("Backend Utilization Over Time")
 plt.grid(True, alpha=0.3)
-plt.savefig("output.png", dpi=300, bbox_inches="tight")
-print("\nPlot saved to output.png")
+
+# Determine format from file extension
+output_path = args.output
+file_ext = Path(output_path).suffix.lower()
+format_map = {
+    ".png": "png",
+    ".pdf": "pdf",
+    ".svg": "svg",
+    ".jpg": "jpg",
+    ".jpeg": "jpg",
+}
+output_format = format_map.get(file_ext, "png")
+
+plt.savefig(output_path, format=output_format, dpi=300, bbox_inches="tight")
+print(f"\nPlot saved to {output_path} (format: {output_format})")
 plt.show()
