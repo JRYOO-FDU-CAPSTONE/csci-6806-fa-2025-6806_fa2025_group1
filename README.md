@@ -23,12 +23,127 @@ Some terms were renamed after coding for better clarity in the paper. However, t
 - Chunks (in the code) are called segments (in the paper)
 
 
-## Walkthrough Video
-We have verified that our instructions work on Chameleon, and have recorded a video showing the setup of the environment and the reproduction of the instructions below (YouTube: http://tiny.cc/BaleenArtifactYT). This video shows the setup on Chameleon, the running of the instructions below and the running of all notebooks successfully run with no error cells.
-
-[![Baleen Artifact Walkthrough (FAST 2024)](https://github.com/wonglkd/Baleen-FAST24/assets/2821951/4b1f348b-35fc-4262-a69f-a754c0ec99b9)](https://www.tiny.cc/BaleenArtifactYT)
-
 ## Getting Started
+
+### Requirements
+
+- **Operating System**: Linux (tested on Linux 6.17.5)
+- **Python Version**: Python 3.11
+- **RAM**: Minimum 8GB (16GB+ recommended for large simulations)
+- **Disk Space**: At least 2GB free for output files and cache data
+- **Dependencies**: matplotlib, numpy, pandas (install via `pip install -r scripts/reqirements.txt`)
+
+### Setup Instructions (setup/activate Environment)
+
+Clone the repository (if not already done):
+
+```
+git clone https://github.com/JRYOO-FDU-CAPSTONE/csci-6806-fa-2025-6806_fa2025_group1.git
+cd csci-6806-fa-2025-6806_fa2025_group1
+```
+
+Create/Activate Conda Environment (~5 minutes):
+
+```bash
+conda env create -f BCacheSim/install/env_cachelib-py-3.11.yaml
+conda activate cachelib-py-3.11
+```
+
+Install additional dependencies (~2 minutes):
+
+```bash
+python3 -m pip install --user -r BCacheSim/install/requirements.txt
+python3 -m pip install --user -r scripts/requirements.txt
+```
+
+Download trace files (~5 minutes, depending on network speed):
+
+```bash
+cd data && bash get-tectonic.sh && cd ..
+```
+
+### Reproducing Results (Generate figures)
+
+Create ouput folder:
+
+```bash
+mkdir figs
+```
+
+#### Minimal Experiments (~2-5 minutes)
+```bash
+python scripts/run_eviction_experiments_minimal.py --ouput figs/output.pdf
+```
+
+#### EDE Figure 1 - Peak DT vs. α_TTI (EWMA) (~30-60 minutes)
+Plot showing the relationship between Peak Disk-head Time and the EWMA alpha parameter for Time-To-Idle in the EDE eviction policy.
+
+```bash
+python scripts/a5_ede_fig1.py --output figs/a5_ede_fig1.pdf
+```
+
+#### EDE Figure 2 - Peak DT vs. PROTECTED Cap (~30-60 minutes)
+Plot showing how the Peak Disk-head Time varies with different PROTECTED capacity settings in the EDE eviction policy.
+
+```bash
+python scripts/a5_ede_fig2.py --output figs/a5_ede_fig2.pdf
+```
+
+#### DT-SLRU Figure 1 - Peak DT vs. DT-per-byte Score (~10-20 minutes)
+Plot showing the relationship between Peak Disk-head Time and DT-per-byte scoring threshold in the DT-SLRU eviction policy.
+
+```bash
+python scripts/a5_dt_slru_fig1.py --output figs/a5_dt_slru_fig1.pdf
+```
+
+#### DT-SLRU Figure 2 - Hit Rate vs. DT-per-byte Score (~10-20 minutes)
+Plot showing cache hit rate performance across different DT-per-byte scoring thresholds in the DT-SLRU eviction policy.
+
+```bash
+python scripts/a5_dt_slru_fig2.py --output figs/a5_dt_slru_fig2.pdf
+```
+
+### Validation Checklist
+
+#### Full Eviction Evaluation
+
+For LRU (baseline) (~2 min):
+
+```bash
+python scripts/evaluate_eviction.py --policy E0_LRU
+```
+
+For DT-SLRU (~2 min):
+
+```bash
+python scripts/evaluate_eviction.py --policy E1_DT-LRU
+```
+
+For EDE (~10 min):
+
+```bash
+python scripts/evaluate_eviction.py --policy E2_EDE
+```
+
+#### Cache Hit Rate Logging (~5 minutes)
+
+```bash
+python scripts/log_hit_rate.py --trace data/tectonic/202110/Region4/full_0_0.1.trace
+```
+
+#### Memory Usage Profiling (~5 minutes)
+
+```bash
+python scripts/profile_memory.py
+```
+
+### Limitations
+
+- **Platform Support**: Only tested on Linux systems; may not work on Windows or macOS without modifications
+- **Trace Data**: Experiments require Tectonic trace files which are large (~GB range) and may take significant time to download
+- **Simulation Time**: Full experiments can take several hours per policy (multiple runs); results are not real-time
+- **Memory Constraints**: Large cache simulations may require 16GB+ RAM; running with insufficient memory will cause crashes
+- **Single-threaded**: Simulations run sequentially; parallelization requires manual script modification
 
 _Time estimate: 60 mins (20 mins interactive)._
 
