@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # from argparse import ArgumentParser
-from jsonargparse import ArgumentParser, ActionConfigFile, ActionYesNo
-
+from jsonargparse import ActionConfigFile, ActionYesNo, ArgumentParser
 
 from . import sim_cache
 
