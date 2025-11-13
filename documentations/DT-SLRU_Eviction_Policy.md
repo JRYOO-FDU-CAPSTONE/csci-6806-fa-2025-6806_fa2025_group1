@@ -218,3 +218,51 @@ if options.eviction_policy == 'dt-slru':
         options=options,
         eviction_policy='dt-slru')
 ```
+## Key Features of DT-SLRU
+
+### 1. **Segmented Architecture**
+- Two distinct segments for hot and cold items
+- Items promoted from probationary to protected on access
+- Separate LRU chains for each segment
+
+### 2. **Dynamic Threshold Adaptation**
+- Monitors hit rates over adaptation intervals
+- Adjusts protected/probationary ratio based on performance
+- Responds to changing access patterns
+
+### 3. **Intelligent Victim Selection**
+- Prioritizes eviction from probationary segment
+- Only evicts from protected segment when necessary
+- Maintains working set in protected segment
+
+### 4. **Performance Benefits**
+- Better hit rates for workloads with temporal locality
+- Adaptive to changing access patterns
+- Reduces cache pollution from one-time accesses
+
+## Comparison with Existing Policies
+
+| Policy | Segments | Dynamic | Complexity | Best For |
+|--------|----------|---------|------------|----------|
+| LRU | 1 | No | O(1) | General purpose |
+| LIRS | 2 (LIR/HIR) | No | O(1) | Access pattern aware |
+| TTL | 1 | No | O(log n) | Time-based expiration |
+| **DT-SLRU** | **2** | **Yes** | **O(1)** | **Adaptive workloads** |
+
+## Implementation Considerations
+
+### 1. **Memory Overhead**
+- Additional metadata for segment tracking
+- Threshold adaptation statistics
+- Performance monitoring counters
+
+### 2. **Parameter Tuning**
+- Initial protected ratio (default: 0.8)
+- Adaptation interval (default: 1000 accesses)
+- Hit rate thresholds for adaptation
+
+### 3. **Thread Safety**
+- Segment operations need synchronization
+- Threshold updates should be atomic
+- Statistics collection must be consistent
+
