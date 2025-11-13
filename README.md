@@ -122,7 +122,7 @@ Expected Peak DT ≈ 1–2 ms
 For DT-SLRU (~2 min):
 
 ```bash
-python scripts/evaluate_eviction.py --policy E1_DT-LRU
+python scripts/evaluate_eviction.py --policy E1_DT-SLRU
 ```
 Output Format:
 ✔ Loaded config from: runs/example/dt-slru/config.json
