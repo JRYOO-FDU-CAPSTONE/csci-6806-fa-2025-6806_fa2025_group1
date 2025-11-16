@@ -51,3 +51,10 @@ while protecting high-value items based on their service-time-per-byte (DT-per-b
 - 	**Adaptive Learning**: Uses EWMA smoothing to adapt to changing access patterns
 -	 **Fixed Protection Capacity**: Ensures predictable cache behavior
 
+	## Configuration Parameters
+
+| Parameter | Description | Range |
+|-----------|-------------|--------|
+| `dt_per_byte_score` | Minimum DT-per-byte threshold for protection | seconds/byte |
+| `protected_cap` | Maximum fraction of cache reserved for protected items | 0.0-1.0 |
+| `alpha_tti` | given variable  for TTI updates | 0.0-1.0 |
