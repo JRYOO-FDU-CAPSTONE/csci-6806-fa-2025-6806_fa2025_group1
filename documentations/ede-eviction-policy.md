@@ -58,3 +58,14 @@ while protecting high-value items based on their service-time-per-byte (DT-per-b
 | `dt_per_byte_score` | Minimum DT-per-byte threshold for protection | seconds/byte |
 | `protected_cap` | Maximum fraction of cache reserved for protected items | 0.0-1.0 |
 | `alpha_tti` | given variable  for TTI updates | 0.0-1.0 |
+
+
+# Understanding alpha_TTI (TIME TO IDLE) 
+
+The `alpha_tti` parameter controls how quickly the time-to-idle (TTI) predictions adapt to new observations:
+
+alpha_tti = 1.0: TTI estimates adapt immediately to new observations (high responsiveness, low stability)
+
+alpha_tti = 0.1: TTI estimates change slowly, giving more weight to historical data (high stability, low responsiveness)
+
+alpha_atti = 0.5: Balanced approach between responsiveness and stability
