@@ -113,9 +113,11 @@ For LRU (baseline) (~2 min):
 python scripts/evaluate_eviction.py --policy E0_LRU
 ```
 Output Format:
+```
 ✔ Loaded config from: runs/example/lru/config.json
 ✔ Simulation completed in 00:xx
 ● Peak DT: X.XX ms
+```
 Expected Peak DT ≈ 1–2 ms
 
 
@@ -125,9 +127,11 @@ For DT-SLRU (~2 min):
 python scripts/evaluate_eviction.py --policy E1_DT-SLRU
 ```
 Output Format:
+```
 ✔ Loaded config from: runs/example/dt-slru/config.json
 ✔ Simulation completed in 04:55
 ● Peak DT: X.XX ms
+```
 Expected Peak DT ≈ 1–3 ms
 
 For EDE (~10 min):
@@ -136,9 +140,11 @@ For EDE (~10 min):
 python scripts/evaluate_eviction.py --policy E2_EDE
 ```
 Output Format:
+```
 ✔ Loaded config from: runs/example/lru/config.json
 ✔ Simulation completed in 00:xx
 ● Peak DT: X.XX ms
+```
 Expected Peak DT ≈ 1–5 ms
 
 
@@ -148,10 +154,12 @@ Expected Peak DT ≈ 1–5 ms
 python scripts/log_hit_rate.py --trace data/tectonic/202110/Region4/full_0_0.1.trace
 ```
 Output Format:
+```
 ✔ Loaded config from: runs/example/lru/config.json
 ✔ Using trace file: data/tectonic/202110/Region4/full_0_0.1.trace
 ✔ Simulation completed in 00:xx
 ● Cache Hit Rate: xx.x %
+```
 Expected Hit Rate: ~75–90%
 
 
@@ -161,9 +169,11 @@ Expected Hit Rate: ~75–90%
 python scripts/profile_memory.py
 ```
 Output Format:
+```
 ✔ Loaded config from: runs/example/lru/config.json
 ✔ Simulation completed in 00:xx
 ● Peak memory: xxx.x MB
+```
 Expected Peak Memory: ~1–3 GB
 
 
