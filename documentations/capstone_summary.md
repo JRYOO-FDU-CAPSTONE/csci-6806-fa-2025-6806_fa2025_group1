@@ -95,3 +95,13 @@ Key observations:
 These results support the paper's claim that Baleen's performance does not depend on fine-tuned thresholds and generalizes well across workloads.
 
 ---
+
+## 8. Project Timeline
+
+| Assignment | Focus | Summary of Work |
+|-----------|--------|------------------|
+| A1 | Background | Introduced flash caching basics, DT metric, and motivation for optimizing backend load |
+| A2 | Related Work | Surveyed prior research in hybrid storage, selective admission, and ML-driven caching |
+| A3 | Methodology | Analyzed the Baleen-FAST24 artifact, experiment structure, and key performance metrics |
+| A4 | Evaluation | Interpreted Baleen vs. baseline results (Peak DT, Median DT, hit rate, flash write rate) |
+| A5 | Ablation Study | Evaluated parameter sensitivity (𝜏DT, PROTECTED cap, 𝛼tti) |
