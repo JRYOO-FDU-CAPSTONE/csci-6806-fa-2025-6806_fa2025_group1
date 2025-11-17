@@ -2,6 +2,8 @@
 
 
 
+
+
 This document intends to be a documentation we did for the ede eviction policy.
 
 # Overview of EDE 
@@ -22,3 +24,48 @@ while protecting high-value items based on their service-time-per-byte (DT-per-b
 	Traditional eviction policies like LRU (Least Recently Used) make decisions based solely on recency,
 
 	but EDE incorporates predictive modeling to anticipate future access patterns.
+
+
+        # EDE's time to idle prediction 
+
+
+          EDE uses episode context to predict when items will become idle. Each item's time-to-idle (TTI) is estimated based on its maximum interarrival time within its episode, with  to adapt predictions over time 
+        
+           In EDE, Items are evaluated based on their service-time savings per byte:
+           
+            This can be denoted with the following formula: 
+        
+           DT-per-byte = (hits × seek_time + chunks × transfer_time) / size_in_bytes
+
+	Items exceeding a configurable DT-per-byte threshold are protected from eviction. 
+
+	#  Protected Segment Management 
+	EDE maintains a protected segment that reserves a configurable fraction of cache capacity for high-value items.
+	
+	This prevents high DT-per-byte items from being evicted even when their predicted idle time is approaching.
+
+	#Key Features 
+	
+	**Predictive Eviction**: Evicts items closest to their predicted expiration time
+- 	**Value-Based Protection**: Protects high-value items based on DT-per-byte scores
+- 	**Adaptive Learning**: Uses EWMA smoothing to adapt to changing access patterns
+-	 **Fixed Protection Capacity**: Ensures predictable cache behavior
+
+	## Configuration Parameters
+
+| Parameter | Description | Range |
+|-----------|-------------|--------|
+| `dt_per_byte_score` | Minimum DT-per-byte threshold for protection | seconds/byte |
+| `protected_cap` | Maximum fraction of cache reserved for protected items | 0.0-1.0 |
+| `alpha_tti` | given variable  for TTI updates | 0.0-1.0 |
+
+
+# Understanding alpha_TTI (TIME TO IDLE) 
+
+The `alpha_tti` parameter controls how quickly the time-to-idle (TTI) predictions adapt to new observations:
+
+alpha_tti = 1.0: TTI estimates adapt immediately to new observations (high responsiveness, low stability)
+
+alpha_tti = 0.1: TTI estimates change slowly, giving more weight to historical data (high stability, low responsiveness)
+
+alpha_atti = 0.5: Balanced approach between responsiveness and stability
