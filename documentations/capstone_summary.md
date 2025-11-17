@@ -28,7 +28,7 @@ Our first stage focused on understanding flash cache fundamentals and the DT met
 We studied how Peak DT determines storage capacity requirements, and why minimizing Peak DT reduces both latency and infrastructure cost.
 
 We also explored the episode model, which treats each cache residency as a single unit, reflecting the real cost of a flash admission more precisely than hit-rate–based metrics.  
-This model forms the foundation for Baleen’s offline Optimal Admission Policy (OPT), used to train ML models that imitate OPT decisions while adhering to flash write-rate limits.
+This model forms the foundation for Baleen's offline Optimal Admission Policy (OPT), used to train ML models that imitate OPT decisions while adhering to flash write-rate limits.
 
 ---
 
@@ -40,22 +40,68 @@ We analyzed works that explored:
 - Selective and probabilistic admission policies such as Flashield and OP-FCL;
 - ML and reinforcement learning approaches, including Learning Relaxed Bélády (LRB) and RL-Bélády (RLB).
 
-These studies gradually evolved toward Baleen’s holistic design, which coordinates admission, prefetching, and endurance modeling together.  
-Earlier systems optimized hit rates or byte misses, but Baleen’s focus on DT and Total Cost of Ownership (TCO) provides a more robust, system-level optimization framework.
+These studies gradually evolved toward Baleen's holistic design, which coordinates admission, prefetching, and endurance modeling together.  
+Earlier systems optimized hit rates or byte misses, but Baleen's focus on DT and Total Cost of Ownership (TCO) provides a more robust, system-level optimization framework.
 
 ---
 
 ## 5. Methodology (A3)
 
-The third stage focused on reproducing and analyzing the Baleen-FAST24 artifact, the open-source simulator that accompanied the FAST’24 paper.  
+The third stage focused on reproducing and analyzing the Baleen-FAST24 artifact, the open-source simulator that accompanied the FAST'24 paper.  
 The artifact includes the BCacheSim simulator, trace datasets, ML model scripts, and notebooks for experiment replication.
 
 Our group reviewed:
-- The repository’s structure and experiment configuration;
+- The repository's structure and experiment configuration;
 - Definitions of key metrics: DT, Peak DT, Flash Write Rate, TCO, and Cache Hit Rate;
-- Planned comparisons between baseline heuristics (RejectX, CoinFlip) and Baleen’s ML-guided policies;
+- Planned comparisons between baseline heuristics (RejectX, CoinFlip) and Baleen's ML-guided policies;
 - Training parameters, workload splits, and evaluation methodology aligned with the paper.
 
 This phase established the foundation for our subsequent evaluation and reporting.
 
 ---
+
+## 6. Evaluation (A4)
+
+The fourth stage focused on interpreting experimental results from the Baleen simulator.  
+We analyzed Peak DT, Median DT, Cache Hit Rate, and Cache Size Sensitivity across various eviction schemes, including Baleen, RejectX, EDE, Baseline, and DT-SLRU.
+
+Key findings:
+- Baleen consistently outperforms other policies, reducing Peak DT by approximately 12% and TCO by 17% relative to the best baseline;  
+- Median DT remained stable, confirming that Baleen reduces tail latency without compromising average performance;
+- RejectX improves efficiency modestly but lacks Baleen's adaptive coordination;
+- DT-SLRU and EDE exhibit higher service times even under light loads, emphasizing the benefit of ML-guided coordination between admission and prefetching.
+
+These observations validate Baleen's claim: coordinated ML-driven caching policies can reduce backend load while maintaining flash endurance.
+
+---
+
+## 7. Ablation Study (A5)
+
+The fifth stage focused on an ablation study of Baleen's baseline policies (DT-SLRU and EDE) to evaluate how internal parameters affect performance.  
+All experiments were run using the provided Tectonic traces and the Baleen-FAST24 simulation setup.
+
+We examined the sensitivity of:
+- 𝜏DT - DT-per-byte admission threshold (DT-SLRU);
+- PROTECTED cap - size of the protected region (EDE);
+- 𝛼tti - smoothing factor for time-to-idle (EDE).
+
+Across all experiments, parameter changes produced less than 1% variation in Peak DT, confirming that Baleen and its baselines are stable and robust under moderate configuration changes.
+
+Key observations:
+- Very small 𝜏DT values over-admit blocks and increase Peak DT, very large values underutilize flash;
+- PROTECTED cap had minimal impact, suggesting EDE's decisions rely primarily on deadlines;
+- 𝛼tti values around 0.5-0.7 yielded the best balance between responsiveness and stability.
+
+These results support the paper's claim that Baleen's performance does not depend on fine-tuned thresholds and generalizes well across workloads.
+
+---
+
+## 8. Project Timeline
+
+| Assignment | Focus | Summary of Work |
+|-----------|--------|------------------|
+| A1 | Background | Introduced flash caching basics, DT metric, and motivation for optimizing backend load |
+| A2 | Related Work | Surveyed prior research in hybrid storage, selective admission, and ML-driven caching |
+| A3 | Methodology | Analyzed the Baleen-FAST24 artifact, experiment structure, and key performance metrics |
+| A4 | Evaluation | Interpreted Baleen vs. baseline results (Peak DT, Median DT, hit rate, flash write rate) |
+| A5 | Ablation Study | Evaluated parameter sensitivity (𝜏DT, PROTECTED cap, 𝛼tti) |
