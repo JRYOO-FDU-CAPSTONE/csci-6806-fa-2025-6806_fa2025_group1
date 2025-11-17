@@ -75,3 +75,23 @@ These observations validate Baleen's claim: coordinated ML-driven caching polici
 
 ---
 
+## 7. Ablation Study (A5)
+
+The fifth stage focused on an ablation study of Baleen's baseline policies (DT-SLRU and EDE) to evaluate how internal parameters affect performance.  
+All experiments were run using the provided Tectonic traces and the Baleen-FAST24 simulation setup.
+
+We examined the sensitivity of:
+- 𝜏DT - DT-per-byte admission threshold (DT-SLRU);
+- PROTECTED cap - size of the protected region (EDE);
+- 𝛼tti - smoothing factor for time-to-idle (EDE).
+
+Across all experiments, parameter changes produced less than 1% variation in Peak DT, confirming that Baleen and its baselines are stable and robust under moderate configuration changes.
+
+Key observations:
+- Very small 𝜏DT values over-admit blocks and increase Peak DT, very large values underutilize flash;
+- PROTECTED cap had minimal impact, suggesting EDE's decisions rely primarily on deadlines;
+- 𝛼tti values around 0.5-0.7 yielded the best balance between responsiveness and stability.
+
+These results support the paper's claim that Baleen's performance does not depend on fine-tuned thresholds and generalizes well across workloads.
+
+---
