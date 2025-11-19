@@ -1,0 +1,620 @@
+%%
+%% This is file `sample-sigconf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,proceedings,bibtex,sigconf')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigconf.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[sigconf]{acmart}
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+% \setcopyright{acmlicensed}
+\setcopyright{none}
+% \copyrightyear{2018}
+% \acmYear{2018}
+% \acmDOI{XXXXXXX.XXXXXXX}
+%% These commands are for a PROCEEDINGS abstract or paper.
+% \acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%   conference title from your rights confirmation email}{June 03--05,
+%   2018}{Woodstock, NY}
+%%
+%%  Uncomment \acmBooktitle if the title of the proceedings is different
+%%  from ``Proceedings of ...''!
+%%
+%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%%  June 03--05, 2018, Woodstock, NY}
+% \acmISBN{978-1-4503-XXXX-X/2018/06}
+\acmConference{CSCI6806 Capstone Proj}{Sep. 2025}{Vancouver, BC, CA}
+
+\settopmatter{printacmref=false} % removes the footnote below the first column
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes conference info footnote
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+% fix figure
+\usepackage{array}
+
+\usepackage{adjustbox}
+
+\usepackage[inkscapelatex=false]{svg}
+
+\svgsetup{inkscapelatex=false}
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{Group 1: Related Work}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+
+\author{Anna Gorislavets}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{a.gorislavets@student.fdu.edu}
+
+\author{Bikash Shyangtang}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{b.shyangtang@student.fdu.edu}
+
+\author{Hao Chen}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{h.chen4@student.fdu.edu}
+
+\author{Maoting Li}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{m.li3@student.fdu.edu}
+
+\author{Salinrat Thanathapsakun}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{s.thanathapsakun@student.fdu.edu}
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+% \renewcommand{\shortauthors}{Trovato et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+% \begin{abstract}
+%   A clear and well-documented \LaTeX\ document is presented as an
+%   article formatted for publication by ACM in a conference proceedings
+%   or journal publication. Based on the ``acmart'' document class, this
+%   article presents and explains many of the common variations, as well
+%   as many of the formatting elements an author may use in the
+%   preparation of the documentation of their work.
+% \end{abstract}
+
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+% \begin{CCSXML}
+% <ccs2012>
+%  <concept>
+%   <concept_id>00000000.0000000.0000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>500</concept_significance>
+%  </concept>
+%  <concept>
+%   <concept_id>00000000.00000000.00000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>300</concept_significance>
+%  </concept>
+%  <concept>
+%   <concept_id>00000000.00000000.00000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>100</concept_significance>
+%  </concept>
+%  <concept>
+%   <concept_id>00000000.00000000.00000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>100</concept_significance>
+%  </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+% \ccsdesc[500]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+% \ccsdesc[300]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+% \ccsdesc{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+% \ccsdesc[100]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+% \keywords{Flash Cache, HDD throughput bottleneck, Disk-head Time (DT)}
+%% A "teaser" image appears between the author and affiliation
+%% information and the body of the document, and typically spans the
+%% page.
+% \begin{teaserfigure}
+%   \includegraphics[width=\textwidth]{sampleteaser}
+%   \caption{Seattle Mariners at Spring Training, 2010.}
+%   \Description{Enjoying the baseball game from the third-base
+%   seats. Ichiro Suzuki preparing to bat.}
+%   \label{fig:teaser}
+% \end{teaserfigure}
+
+% \received{20 February 2007}
+% \received[revised]{12 March 2009}
+% \received[accepted]{5 June 2009}
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+
+% \onecolumn make the document one column
+
+\section{Related Work}
+
+\subsection{Flash caching for HDD-backed bulk storage}
+
+Bringing the performance gap between hard disk drives (HDDs) and solid-state drives (SSDs) has been a long-standing conundrum in both industry and academia, with flash caching being a crucial research topic. HDDs have the advantage of high capacity, but with limited throughput, while SDDs are comparatively higher in throughput; they have to stay under a limited write budget in order to avoid premature wearout. The Figure~\ref{fig:1} illustrates how the disk-head time (DT)-aware flash cache operates between clients and the HDD array.
+
+\begin{figure}[ht!]
+  \centering
+  \includesvg[width=0.48\textwidth]{a2_diagrams/fig_Bucket_A}
+  \caption{DT-Aware Flash Cache in front of HDD Backend. DT-aware controller estimates DT from backend telemetry and tunes admission/eviction (and WB/WT mode) to keep DT below a target while serving hits from flash.}
+  \label{fig:1}
+\end{figure} 
+
+The research in flash caches has the hope of delivering a balanced solution. Overall, the articles explore the question of how to design a caching system that takes care of the issues of performance and endurance. This part of the paper presents an overview of ten years of research in the field and dives into topics such as hybrid storage architectures, adaptive admission, cost modeling, and endurance optimization. These 10 articles together have laid the groundwork for the approach of using the episode model and machine learning (ML)-guided admission and prefetching policies \cite{hsieh2012cachingless, ma2014reliablewriteback, li2015ripq, eisenman2019flashield, berg2020cachelib, mcallister2021kangaroo, xia2021tectonic, wang2023fifo}.
+
+One of the approaches, which focused on bridging the gaps of endurance and performance on HDDs and SSDs, was introduced in \cite{hsieh2012cachingless}. The article explores the possibility of combining HDDs with SSD caches to establish various hybrid storage systems. It concludes that more cache space does not necessarily lead to better performance because SSDs need significant space for garbage collection, so increasing cache space alone undermines endurance and performance. The article proposed the OP-FCL cost model that dynamically adjusts cache size based on the garbage collection overhead in real time. The article first introduced the trade-off between cache size and write amplification that led to the emphasis of later discussions on the total cost of ownership (TCO). 
+
+Other related work in this period also focused on partitioning and selective admission. Numerous attempts were made to separate read and write regions in both HDDs and SSDs, and others experimented with new caching methods that used less energy or write buffering—placing incoming write requests in a temporary buffer (DRAM) before flash to reduce write amplification \cite{ma2014reliablewriteback}. These articles push the recognition that flash cache is a finite resource and has limited endurance when the concept of DT had not been introduced \cite{wong2024baleen}.
+
+In the mid-2010s, researchers were primarily shifting their focus to the investigation of admission control policies that filter incoming data before it is written to flash. Admission policies in this period can be broken down into two broad categories—reject-style and probabilistic admission policies—both were aimed at extending SSD lifespan. Some admission policies only admit objects that are “flash-worthy” as these objects are likely to have multiple hits, and discard other objects to save SSD endurance. However, works on the Flashield model conclude that various selective admission policies that focus on improving hit rates can only extend SSD’s life span moderately [6]. Together, these studies highlight the need for designing admission and eviction policies that include the cost of writing to flash.  
+
+Yet the admission policies designed in the mid-2010s often optimized metrics like hit-rate, byte misses and bandwidth utilization, these metrics indeed reduced backend load marginally, but they failed to capture the full picture as the newly designed Baleen flashing caching system illustrated that an increase in hit rate and other aforementioned metrics may not reduce backend load if too much traffic is sent to the flash \cite{wong2024baleen}.  
+
+The papers in this section introduce several models. For instance, \cite{hsieh2012cachingless} introduces several cost models that were used to take into account both endurance and performance. Other work investigates the feasibility of cooperative caching—a process of making HDDs and SSDs to specialize in different tasks during the caching process to avoid duplicated effects \cite{berg2020cachelib}. Others examined a probabilistic admission policy where objects are being admitted to flash cache based on a preprogrammed probability to ensure balanced workloads and stay under the endurance limit of SSDs.
+
+Therefore, by the mid-2010s, the scholarly community had begun to introduce various kinds of admission policies to prevent premature flash cache wearout. However, most admission policies relied on hit rates and probability and ignored fixed write costs altogether. Thus, write amplification is never considered in the aforementioned admission policies, which, on its own, is a crucial variable for flash cache endurance \cite{wong2024baleen}.
+
+Later papers expanded the scope of flash caching to its application in distributed systems, and in particular, how flash caching can be implemented in both cloud and enterprise settings \cite{berg2020cachelib, mcallister2021kangaroo, xia2021tectonic}.
+
+A key theme that was observed is that all these 10 articles addressed, although different in length, is that the primary expense of a data storage infrastructure is driven by the number of HDDs the infrastructure has to absorb the peak-end load, which \cite{wong2024baleen} defines as the Peak DT. In the article, this is formalized into the TCO model, which is the sum of HDD ownership cost and SSD endurance cost. 
+
+\subsubsection*{Pros and Cons}
+
+The first pro of these 10 articles is that they form a comprehensive picture to illuminate the readers on the trade-offs between endurance and performance. They have collectively built a detailed foundation that goes from the design choice of admission policies, an exploration of various cost models to stay below the endurance limit of flash cache, while reducing backend workload. The different approaches experimented with by scholars across the course of a decade offer a clear timeline that illustrates the progression of different approaches from probabilistic admission policies that had been gradually refined to Baleen’s episode model, together with ML-guided admission and prefetching to optimize DT and accurately model the true TCO.
+
+The second pro of the articles is that they examined a wide range of factors that impact both performance and endurance, such as cooperative caching, selective admission based on probabilistic or ML-guided admission and prefetching, offering various avenues for future research \cite{hsieh2012cachingless, li2015ripq}.
+
+On the other hand, the articles have two major cons. The first one is that all of these 10 papers addressed admission, eviction, and prefetching in isolation as individualized subjects. Few considered how these 3 factors were indeed interrelated. The second is connected with overemphasizing the importance of probabilistic metrics. Many studies focused much of their discussion on hit-rate optimization and byte misses. This is an incorrect approach, as the Baleen article concludes that higher hit rates do not reduce back-end load \cite{eisenman2019flashield, wong2024baleen}.
+
+% conclusion bucketA
+The Baleen article demonstrated the limitations of these approaches; the earlier studies nevertheless provided meaningful building blocks—endurance model \cite{hsieh2012cachingless}, probabilistic admission and caching \cite{luo2016cloudcache, eisenman2019flashield, berg2020cachelib, mcallister2021kangaroo}—that informed the more comprehensive framework in the Baleen article.
+In contrast to Baleen, which optimized DT and minimized total cost of ownership with its episode model, ML-guided admission and prefetching policies, the papers in this section primarily relied on probabilistic admission and related metrics like hit rate or bandwidth \cite{hsieh2012cachingless, luo2016cloudcache, eisenman2019flashield, mcallister2021kangaroo}.
+
+
+\subsection{Admission and Prefetching strategies}
+
+ML–provided caching work moved beyond heuristic policies by approximating the Bélády MIN oracle through forecasting models. Learning Relaxed Bélády (LRB) \cite{song2020lrb} introduced a realistic eviction system, relaxing Bélády’s hard rule of evicting the furthest-future item, by naming a Bélády boundary, which LRB decides through objects whose next access falls some distance toward the future, and taking Gradient Boosting Machines (GBM) and features of deltas, exponentially decayed counts, and static metadata, respectively, for evicting contender items. Reducing WAN traffic by 4–25\%, compared to production baselines (e.g., B-LRU), and exhibiting modest overhead on real content delivery network servers (CDN), this design reduces WAN traffic and makes CDN infrastructure operations feasible.
+
+Extending this work, RL-Bélády (RLB) \cite{yan2020rlbelady} generalizes the approach to optimizing admission and eviction over an aggregate framework, and blends light-weight next-requirement guessing and reinforcement learning for controllable admission control, and takes Limited Stochastic Optimization (LSO) and Experts Decision Model (EDM) controlling RL instability, respectively. The Figure~\ref{fig:2} shows the architecture of this approach.  Measurements on traces of YouTube, Bilibili, and Iqiyi suggest RLB’s superior, higher hit rates and up to 50\%s lower training cost than LRB, and performed especially on relatively steady workloads. Together, these surveys suggest a shift from heuristic, single-point policies toward holistic, ML-advantaged caching frameworks balancing guessing accuracy, controllability, and ease of deployability.
+
+\begin{figure}[ht!]
+  \centering
+  \includesvg[width=0.48\textwidth]{a2_diagrams/Figure2}
+  \caption{Architecture of RLB used in decision making when there is a content request for content admission and content eviction.}
+  \label{fig:2}
+\end{figure}
+
+\subsubsection*{Pros and Cons}
+
+The fact that LRB reduces WAN traffic (4–25\%) significantly relative to heuristics such as B-LRU, and keeps lightness and deployability at production scale can be considered as the first pro. The second pro refers to the admission and evictions in RLB use caching, meaning higher hit rates and lower training cost up to 50\% on workloads that remain steady.
+
+This approach also has cons, such as the LRB continues to show a large gap between Bélády MIN and requires appropriate tuning of thresholds (Bélády boundary) for different workloads. The second con is that the performance of RLB is stability-of-data-dependent, and it does best on stabilized traces but does poorly on highly unstable request patterns, such as YouTube.
+
+%The episodes model is used to capture cache residency more accurately than the traditional approach of measuring cache hit rate. The episode begins with an objection being admitted into flash and ends with the object being evicted (Figure~\ref{fig:3}).
+
+In contrast to Baleen, which adopts an ML-controlled design of jointly managing admission and prefetching trained end-to-end on OPT label predictions given episode-based traces, LRB and RLB seek alternate outlooks. LRB focuses on evacuation, approximating Bélády under a loose-boundary mechanism and Gradient Boosting predictions, and achieves WAN-traffic-reduction substantially in CDN caches at the expense of minimal overhead but no prefetching integration \cite{yan2020rlbelady}. RLB, though more comprehensive than LRB, generalizes learning across admission and evacuation under reinforcement learning and next-request prediction, but again does not achieve end-to-end optimization of Baleen. Relative to the overall TCO and disk-level efficiency of Baleen, LRB, and RLB worry almost exclusively about cache-side hit rates and WAN-traffic-reduction. Therefore, Baleen forms a holistic, system-level ML design, while LRB and RLB emphasize deployable, modular solutions at the expense of decreased complexity and limited optimization range \cite{yan2020rlbelady}.
+
+%Within an episode, all requests that occur during this period are grouped. Writing an object into flash always consumes a fixed flash write cost as long as the object remains in the cache, no matter how many times the object is accessed subsequently before the object is evicted. The benefit of the episodes model is that by treating the entire cache residency as one unit, it reflects the cost of an admission more accurately than the traditional hit rate approach. In addition to the episodes model, the paper introduces an Optimal Admission Policy (OPT). OPT actively selects the episodes that minimizes Peak DT under the constraint of a fixed flash writes budget. However, since the OPT is offline therefore it is not deployable in practice. Instead, the authors use OPT to train the ML admission model to imitate OPT’s admission decisions to provide the optimal reduction in backend workload. The authors’ approach of using ML-guided admission policy resonates with other scholarly works in the same subject. Yan\& Li design RL-Bélády \cite{yan2020rlbelady}, a caching algorithm that administers admission policies based on improving hit rates. However, the episodes model introduced by the authors here is superior to Yan\& Li’s framework because the episodes model reflects the true cost of ownership more accurately than the framework proposed by Yan and Li. Moreover, in this article, Wong and his coauthors explicitly targeted the reduction of backend load to stay within the recommended flash endurance limits. 
+
+%\begin{flushright}
+%\textit{Word count: 280}
+%\end{flushright}
+
+\subsection{Cost-/Endurance-aware control of flash write rates (TCO)}
+
+The Figure~\ref{fig:3} illustrates the architecture of endurance- and cost-aware flash caching. Building on this perspective, CacheSack is a cache admission optimization algorithm developed at Google, built for lowering the overall TCO of Colossus Flash Cache, the general-purpose flash-cache service in Google datacenters \cite{yang2022cachesack}. It is due to the shortcomings of flash (write amplification, low endurance) and the pricey cost of disk reads, which does not scale with drive capacity.
+
+\begin{figure}[ht!]
+  \centering
+  \includesvg[width=0.48\textwidth]{a2_diagrams/fig_Bucket_C.svg}
+  \caption{Endurance- and TCO-aware control. Endurance budget and cost models feed into a controller that tunes admission and prefetch to cap flash writes while minimizing TCO under performance constraints.}
+  \label{fig:3}
+\end{figure}
+
+Classical static admission policies, for example, Lazy Adaptive Replacement Cache (LARC), required hand-tuned parameters, which in turn meant undesirable flash writes or degraded cache hit ratios. CacheSack addresses these problems by categorizing the cache traffic, modeling disk read/write cost at every level of category, and formulating a knapsack problem in order to derive the admission policies optimally.
+
+It requires four interlinked policies—AdmitOnWrite, AdmitOnMiss, AdmitOnSecondMiss (LARC), and NeverAdmit—on different aggressiveness levels. It evades NP-hardness, thus inheriting from combinatorial features of the knapsack problem by adopting an approximation method through the use of the fractional knapsack solved through a greedy algorithm. It emulates the least-recently-used (LRU) policy through a time-to-live (TTL) model and applies ghost caches, buffer cache simulators, and similarity enhancement.
+
+CacheSack was rolled out globally to Colossus Flash Cache in May 2021 and switched on as the default admission algorithm. It's a decentralized, lightweight implementation, not requiring end-user configuration, reducing the cost of adoption. We confirm through production experiments and simulation and observe unmistakable gains: 6.5\% lower TCO, 6\% lower disk read, and 26\% lower traffic measured in terms of bytes written to flash compared to LARC. \cite{yang2022cachesack} AdmitOnMiss resulted in the larger hit ratios, but CacheSack provided cheaper cache handling by taking read and write cost into account. CacheSack, in short, is a production-proven system based on theoretical modeling and a lean, distributed design, and has been, since May 2021, Google datacenters' default admission algorithm, and is capable of handling large-scale flash cache in the optimal fashion to keep cost minimal and life alive.
+
+\subsubsection*{Pros and Cons}
+
+Reducing both disk reads and flash writes showed a 6.5\% improvement of TCO in production, which is a clear pro of the approach. The other pro is that the approach is adaptive, fully decentralized, and suitable for real-world use with little manual configuration or tuning needed.
+One of the cons is that it depends on TTL approximation and fractional knapsack modeling, an approximation that is not truly the optimum. It also relies on well-defined workloads (e.g., databases) and has unstructured workloads, which is the second con.
+
+In contrast to Baleen, CacheSack reduces admission via a fractional knapsack formulation over bunched workloads instead of ML, targeting disk read and flash write reductions instead of learning from OPT oversight. Although both protocols work toward the same ultimate end of reducing the total cost of flash caching, they essentially diverge in approach. CacheSack falls back on heuristic optimization via workload partitioning into sets, cost and reward estimation, and solving of a fractional knapsack problem in order to extract admission policies. Its approach targets disk read and flash write reductions right up front and was demonstrated through large-scale production use at Google. Baleen, however, falls back on machine learning–driven approach via ML-guided admission and ML-guided prefetching trained to reproduce OPT labels extracted from episode traces. Baleen targets end-to-end system metrics such as Peak DT and TCO, and synchronizes admission and prefetching for end-to-end system-level maximization of efficiency. CacheSack, then, targets simplicity, introspectability, and production deployability, whereas Baleen targets ML-driven self-adaptation and end-to-end comprehensive optimization.
+
+
+%Baleen trains an ML-based admission policy that learns to mimic the decisions of OPT. The model relies on attributes derived from storage traces and recency, frequency proxies, object size, and proximity cues. Both temporal locality and structural hints about workload behavior are intended to be captured in these features \cite{yan2020rlbelady}.
+
+%\begin{figure}[ht!]
+%  \centering
+% \includesvg[width=0.30\textwidth]{a1_diagrams/CSCI6806_ML_admission_loop.svg}
+% \caption{ML Admission Training Loop. The outer loop aligns the assumed EA with the EA measured in simulation; the inner loop adjusts the admission threshold until the flash write rate reaches the target. Once both converge, EA and the threshold are fixed.}
+%\label{fig:4}
+%\end{figure}
+
+%This is an extension of previous ML-based admission systems. For example, Flashield employed lightweight SVM classifiers to admit only "flash-worthy" objects and demonstrated the usefulness of selective admission for endurance \cite{song2020lrb}. The training target of the oracle is the OPT, which sends labels for episodes that should be let in under a flash write constraint. OPT is not implementable online, but it provides a perfect supervision signal. By learning to replicate the OPT’s label, Baleen’s ML model learns when flash writes are most effective for reducing backend load \cite{yan2020rlbelady}. 
+
+%The key goal is to reduce Peak DT, not maximize hit rate. A prior prototype that maximized hit rate alone degraded DT as certain admitted objects added flash writes while doing little to alleviate backend pressure. This indicates why optimizing for hit rate does not coordinate with end-to-end performance of systems \cite{yan2020rlbelady}.
+
+\onecolumn
+
+
+\section{Synthesis Analysis}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Taxonomy Matrix}
+  \label{tb:critical_evaluation_table_1}
+  \begin{tabular}{p{3.5cm}p{1.5cm}p{3cm}p{2.5cm}p{3cm}p{2.5cm}}
+  \toprule
+  \textbf{Paper} & \textbf{Granularity} & \textbf{Objective} & \textbf{Prefetch Coordination} & \textbf{Supervision} & \textbf{Endurance model} \\
+  \midrule
+  Caching less for better performance (FAST'12) & Page (4KB) & Performance optimization through cache/OPS balancing & Sequential bypass only + Dynamic partitioning & Cost model-based adaptation & Erase count tracking with wear consideration \\
+  Reliable Writeback for Client-side Flash Caches (ATC'14) & Block & Reliability + Performance & None + Application barriers & Write barriers & None \\
+  RIPQ (FAST'15) & Object & Hit-rate & None + Priority queue abstraction & Segmented-LRU, GDSF & Write amplification minimization \\
+  CacheDedup (FAST'16) & Block & Hit-rate + Endurance & None + Integrated dedup-cache & Duplication-aware algorithms & Write reduction via deduplication \\
+  CloudCache (FAST'16) & Block & Hit-rate + Endurance & Background migration + Coordinated & RWSS-based allocation & Flash write minimization \\
+  Flashield (NSDI'19) & Object & Write amplification minimization & None + ML-based admission control & SVM classifier & Write amplification tracking \\
+  CacheLib (OSDI'20) & Object & Hit-rate + Throughput & None + Hierarchical (DRAM→LOC/SOC) & Admission policies (probabilistic, Flashield-variant) & Write amplification minimization \\
+  Kangaroo (SOSP'21) & Object & Hit-rate optimization under DRAM/write constraints & None + Hierarchical (KLog→KSet) & Threshold admission + RRIParoo & Write amplification minimization \\
+  Tectonic (FAST'21) & Chunk & Resource utilization & None + Coordinated & TrafficGroup management & None \\
+  S3-FIFO (SOSP'23) & Object & Hit-rate & None + Static queues & None & None \\
+  RL-Bélády (MM '20) & Block & Maximize hit rate & None + Eviction only & Reinforcement/OPT imitation & None \\
+  Learning Relaxed Belady (NSDI '20) & Block & Weighted hit rate (accounts for flash/MLC) & None + Eviction only & Relaxed OPT imitation & None \\
+  CacheSack (ATC '22) & Segment & Minimize backend DT (throughput) & None + Joint admission + eviction & OPT imitation & None \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+%\begin{table}[H]
+%  \centering
+%  \small
+%  \caption{Taxonomy Matrix Example}
+%  \label{tb:critical_evaluation_table_1}
+%  \begin{tabular}{llllll}
+%  \toprule
+%  \textbf{Paper} & \textbf{Granularity} & \textbf{Objective} & \textbf{Prefetch Coordination} & \textbf{Supervision} & \textbf{Endurance model} \\
+%  \midrule
+%  Baleen (Fast'24) & Segment & DT (peak backend) & Coordinated & OPT imitation & None \\
+%  Paper A (Fast'21) & Block & Hit-rate & None & Heuristic & None \\
+%  \bottomrule
+%  \end{tabular}
+%\end{table}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Timeline \& Evidence}
+  \label{tb:research_evolution}
+  % \begin{adjustbox}{width=\textwidth}
+  \begin{tabular}{p{1.5cm}p{3.5cm}p{3.5cm}p{4cm}p{4cm}}
+  % \begin{tabular}{lllll}
+  \toprule
+  \textbf{Period} & \textbf{Key Research Focus} & \textbf{Representative Works} & \textbf{Metrics / Objectives} & \textbf{Limitations Relative to Baleen} \\
+  \midrule
+  2010--2015 & Early flash caching algorithms & FAST '12 (Caching Less for Better Performance), ATC '14 (Reliable Writeback), FAST '15 (RIPQ) & Improve Cache Hit-rates for better admission control, tail latency, extend flash cache endurance and reliability & Few papers investigated HDD peak backend load; and most papers were centered on average workload of HDD \\
+  2016--2020 & Cloud-scale hybrid storage systems & FAST '16 (CloudCache), NSDI '19 (Flashield), OSDI '20 (CacheLib) & Latency(for backend response), flash cache throughput, write amplification (in flash cache during write) & Prefetching is not coordinated with admission; no endurance modeling introduced; lacked comprehensive frameworks to estimate TCO. \\
+  2020--2021 & Machine learning guided policies & NSDI '20 (Learning Relaxed Belady), ACM MM '20 (RL-Bélády), ATC '21 (Kangaroo) & Byte miss ratio, hit-rate, queue length for incoming traffic & ML policies supervised by oracles or heuristics; weak peak-load focus; no DT or similar episode-based modelling. \\
+  2022 & Hyperscale automated admission optimization & ATC '22 (CacheSack) & TCO improvement, a seminal solution on tradeoffs between disk reads/writes and endurance & Optimized costs but not DT; no coordination across admission/prefetching \\
+  2023 & Scalable FIFO eviction policies & SOSP '23 (S3-FIFO) & Miss ratio, throughput, flash writes & Ignores DT and peak-load; not tied to episodes or OPT boundaries as seen in Baleen; no TCO analysis. \\
+  \bottomrule
+  \end{tabular}
+  % \end{adjustbox}
+\end{table}
+
+% \begin{table}[H]
+%   \centering
+%   \small
+%   \caption{Timeline \& Evidence example}
+%   \label{tb:critical_evaluation_table_2}
+%   \begin{tabular}{lllll}
+% \toprule
+% \textbf{Period} & \textbf{Key Research Focus} & \textbf{Representative Works} & \textbf{Metrics / Objectives} & \textbf{Limitations Relative to Baleen} \\
+% \midrule
+% 2010--2015 & Early flash caching, SSD endurance, probabilistic admission/eviction policies & FAST '12 (Caching Less for Better Performance), ATC '14 (Reliable Writeback), FAST '15 (RIPQ) & Improve Cache Hit-rates for better admission control, tail latency, extend flash cache endurance and reliability & Few papers investigated HDD peak backend load; and most papers were centered on average workload of HDD \\
+% 2016--2020 & Cloud/object caches, heuristic admission, hybrid flash-DRAM designs & FAST '16 (CloudCache), NSDI '19 (Flashield), OSDI '20 (CacheLib) & Latency(for backend response), flash cache throughput, write amplification (in flash cache during write) & Prefetching is not coordinated with admission; no endurance modeling introduced; lacked comprehensive frameworks to estimate TCO. \\
+% 2020--2021 & ML-guided eviction/admission policies using reinforcement learning & NSDI '20 (Learning Relaxed Belady), ACM MM '20 (RL-Bélády), ATC '21 (Kangaroo) & Byte miss ratio, hit-rate, queue length for incoming traffic & ML policies supervised by oracles or heuristics; weak peak-load focus; no DT or similar episode-based modelling. \\
+% 2022 & Automated admission optimization at hyperscale & ATC '22 (CacheSack) & TCO improvement, a seminal solution on tradeoffs between disk reads/writes and endurance & Optimized costs but not DT; no coordination across admission/prefetching \\
+% 2023 & FIFO-based scalable eviction policies revisit & SOSP '23 (S3-FIFO) & Miss ratio, throughput, flash writes & Ignores DT and peak-load; not tied to episodes or OPT boundaries as seen in Baleen; no TCO analysis. \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+%\FloatBarrier
+%Synthesis after Timeline 1/2 page content 
+\clearpage
+
+\twocolumn
+
+\subsection{Synthesis Timeline}
+
+This paper is divided into three major categories: Flash Caching for HDD Backend, ML-guided Admission and Eviction, and TCO-aware Flash Caching.
+ 
+As for Flash Caching for HDD Backend, research ran from the 2012 period's early works until 2023 \cite{hsieh2012cachingless, ma2014reliablewriteback, li2015ripq,guo2016cachededup, luo2016cloudcache, wang2023fifo}. HDD-based caching systems tried to use flash as a cache layer to improve hit rates, but failed in their plan. Storage throughput improved as well as the number of I/O operations, but past works generally had a page or block-level granularity and used surrogate measures such as hit rate to describe how well they were doing. Consequently, DT was not explicitly optimized. For admission, eviction, and prefetching, there was no broadly applicable supervision based on OPT. Their design elements remained fragmented across different granularities; there was no unified system-level metric.
+ 
+In the years around 2019-2021, ML-guided admission and eviction emerged as a step beyond heuristics. Systems such as Flashield, CacheLib, and Kangaroo \cite{eisenman2019flashield, berg2020cachelib, mcallister2021kangaroo} used ML to guide the admission and eviction of objects. Occasionally, this OPT-supervised design, according to the taxonomy, these systems' policies coordinated at the object level, endurance models were introduced, such as that for write amplification minimization. However, their OPT remained heuristic or probabilistic, and coordinated prefetching was either absent or only pertained to hierarchical structure. While they aimed at low latency and high throughput, episodes and OPT were not fully brought together to unify repair costs across admission, eviction, and prefetching.
+ 
+With TCO-aware Flash Caching, attention shifts toward a more cost-effective data center. Papers such as \cite{yan2020rlbelady} and \cite{yang2022cachesack} explicitly linked Peak DT with flash-write rates and incorporated cost-aware policies into their decisions based on endurance consideration. According to the system-level metric, these works used OPT imitation and integrated endurance models at the block or segment level; they moved closer to being system-level optimizations. Nevertheless, the majority of these approaches were limited to certain particular workloads and lacked general applicability for many cases.
+ 
+The \cite{wong2024baleen} spans all three subdivisions. It elevates DT, rather than just conventional hit rates, as a key metric for backend use. Baleen contributes the episode model as well as OPT-supervised admission and eviction guidelines while also coordinating prefetching holistically to reduce DT. Additionally, Baleen progresses into Baleen-TCO. Here, Peak DT is explicitly linked in turn with flash endurance and cost-optimal system-level policies. In this way, Baleen reorganizes the previous fragmentation of approaches described in taxonomy matrices and integrates different objectives. It forms a coherent, end-to-end, ML-guided system-level optimization.
+
+
+\clearpage
+
+\section{Member Contributions}
+
+\subsection{Anna Gorislavets}
+
+\begin{itemize}
+    \item Managed Endurance- and TCO-aware control and DT-Aware Flash Cache in front of HDD Backend figures.
+    \item Provided figure captions, made the final formatting in the LaTeX.
+    \item Used Overleaf for collaboration and Excalidraw for diagrams.
+    \item Ensured quality by cross-checking the information, aligning with the rubric requirements.
+    \item Took part in the final reading.
+\end{itemize}
+
+\subsection{Bikash Shyangtang}
+
+\begin{itemize}
+    \item Responsible for Addmission and prefetching strategies for bucket B analyzing different papers.
+    \item Explained about Learning Relaxed Belady (LRB), described about admission and conviction strategies.
+    \item Use Overleaf for editing LaTeX, and draw.io for making diagrams.
+    \item Ensured quality by comparing content with source papers and validating technical clarity with peers.
+    \item Supported the integration of figures into LaTeX and helped organize group editing sessions.
+\end{itemize}
+
+\subsection{Hao Chen}
+
+\begin{itemize}
+    \item Responsible for analyzing 13 papers and creating Taxonomy Matrix.
+    \item Create and format LaTeX templates, help creating figures, and literature review.
+    \item Overleaf for collaborative editing and Notion for project management and task tracking.
+    \item Quality was ensured by reviewing the checklist from the grading rubric and proofreading the entire paper with everyone present at the Teams Meeting before submission.
+    \item Coordinated paper submission, used Notion to manage assignment progress and deadline, set up routine Zoom/Teams meetups.
+\end{itemize}
+
+\subsection{Maoting Li}
+
+\begin{itemize}
+    \item Responsible for finding the first five articles used in Bucket A 
+    \item Drafted 500+ words in section 1.1 explaining how admission policies evolved from probabilistic that relies on hit-rates to an episode-based modeling seem in Baleen
+    \item Tools Used:  Overleaf
+    \item Created a timeline for all 13 articles used in the article to illutrate the progression of ideas
+    \item Contributed to overall editing by reviewing group sections for consistency in writing style and formatting.
+\end{itemize}
+
+\subsection{Salinrat Thanathapsakun}
+
+\begin{itemize}
+    \item Responsible for ML-guided Admission/Eviction), TCO-aware Flash Caching, and the Synthesis after Timeline.
+    \item Collected relevant research papers and developed synthesis text that integrated DT, OPT/Episodes, Prefetch, TCO, and HDD backend into a coherent narrative aligned with rubric requirements.
+    \item Used LaTeX for formatting and compilation and Notion for coordination.
+    \item Proofread terminology, aligned references and citations, and validated consistency between narrative, tables, and rubric expectations.
+    \item Coordinated with teammates to merge sections, ensured formatting compliance, and contributed to finalizing the report submission by deadline.
+\end{itemize}
+\begin{comment}
+\section{Citations and Bibliographies}
+
+The use of \BibTeX\ for the preparation and formatting of one's
+references is strongly recommended. Authors' names should be complete
+--- use full first names (``Donald E. Knuth'') not initials
+(``D. E. Knuth'') --- and the salient identifying features of a
+reference should be included: title, year, volume, number, pages,
+article DOI, etc.
+
+The bibliography is included in your source document with these two
+commands, placed just before the \verb|\end{document}| command:
+\begin{verbatim}
+  \bibliographystyle{ACM-Reference-Format}
+  \bibliography{bibfile}
+\end{verbatim}
+where ``\verb|bibfile|'' is the name, without the ``\verb|.bib|''
+suffix, of the \BibTeX\ file.
+
+Citations and references are numbered by default. A small number of
+ACM publications have citations and references formatted in the
+``author year'' style; for these exceptions, please include this
+command in the {\bfseries preamble} (before the command
+``\verb|\begin{document}|'') of your \LaTeX\ source:
+\begin{verbatim}
+  \citestyle{acmauthoryear}
+\end{verbatim}
+
+
+  Some examples.  A paginated journal article \cite{Abril07}, an
+  enumerated journal article \cite{Cohen07}, a reference to an entire
+  issue \cite{JCohen96}, a monograph (whole book) \cite{Kosiur01}, a
+  monograph/whole book in a series (see 2a in spec. document)
+  \cite{Harel79}, a divisible-book such as an anthology or compilation
+  \cite{Editor00} followed by the same example, however we only output
+  the series if the volume number is given \cite{Editor00a} (so
+  Editor00a's series should NOT be present since it has no vol. no.),
+  a chapter in a divisible book \cite{Spector90}, a chapter in a
+  divisible book in a series \cite{Douglass98}, a multi-volume work as
+  book \cite{Knuth97}, a couple of articles in a proceedings (of a
+  conference, symposium, workshop for example) (paginated proceedings
+  article) \cite{Andler79, Hagerup1993}, a proceedings article with
+  all possible elements \cite{Smith10}, an example of an enumerated
+  proceedings article \cite{VanGundy07}, an informally published work
+  \cite{Harel78}, a couple of preprints \cite{Bornmann2019,
+    AnzarootPBM14}, a doctoral dissertation \cite{Clarkson85}, a
+  master's thesis: \cite{anisi03}, an online document / world wide web
+  resource \cite{Thornburg01, Ablamowicz07, Poker06}, a video game
+  (Case 1) \cite{Obama08} and (Case 2) \cite{Novak03} and \cite{Lee05}
+  and (Case 3) a patent \cite{JoeScientist001}, work accepted for
+  publication \cite{rous08}, 'YYYYb'-test for prolific author
+  \cite{SaeediMEJ10} and \cite{SaeediJETC10}. Other cites might
+  contain 'duplicate' DOI and URLs (some SIAM articles)
+  \cite{Kirschmer:2010:AEI:1958016.1958018}. Boris / Barbara Beeton:
+  multi-volume works as books \cite{MR781536} and \cite{MR781537}. A
+  presentation~\cite{Reiser2014}. An article under
+  review~\cite{Baggett2025}. A
+  couple of citations with DOIs:
+  \cite{2004:ITE:1009386.1010128,Kirschmer:2010:AEI:1958016.1958018}. Online
+  citations: \cite{TUGInstmem, Thornburg01, CTANacmart}.
+  Artifacts: \cite{R} and \cite{UMassCitations}.
+
+
+\end{comment}
+%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+% \nocite{song2020lrb} % this will cite everything in *.bib file
+%\citestyle{acmauthoryear}
+
+\citestyle{acmnumeric}
+\bibliographystyle{ACM-Reference-Format}
+%\bibliographystyle{IEEEtran}
+\clearpage
+% \onecolumn make the document one column
+\bibliography{ref}
+%\bibliography{sample-base}
+
+\clearpage
+
+%%
+%% If your work has an appendix, this is the place to put it.
+% \appendix
+
+% \section{Supplemental Material}
+
+% \begin{figure}[ht!]
+%   \centering
+%   \includesvg[width=0.40\textwidth]{a1_diagrams/CSCI6806_storage_stack.svg}
+%   \caption{Storage Architecture Diagram}
+%   \label{fig:2}
+% \end{figure}
+
+\end{document}
+\endinput
+%%
+%% End of file `sample-sigconf.tex'.

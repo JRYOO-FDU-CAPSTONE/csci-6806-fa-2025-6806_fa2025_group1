@@ -1,0 +1,482 @@
+%%
+%% This is file `sample-sigconf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,proceedings,bibtex,sigconf')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigconf.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[sigconf]{acmart}
+%%
+
+
+
+%% \BibTeX command to typeset BibTeX logo in the docs
+\usepackage{subcaption}
+\usepackage{float}
+
+%use placeins with float barrier to fix position of fig 4a 4b 4c 4d
+\usepackage{placeins}
+
+%use labelfont, labelsep for removing ":" to fix caption of 4a 4b 4c 4d
+\usepackage[labelfont=bf,labelsep=none]{caption}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+% \setcopyright{acmlicensed}
+\setcopyright{none}
+% \copyrightyear{2018}
+% \acmYear{2018}
+% \acmDOI{XXXXXXX.XXXXXXX}
+%% These commands are for a PROCEEDINGS abstract or paper.
+% \acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%   conference title from your rights confirmation email}{June 03--05,
+%   2018}{Woodstock, NY}
+%%
+%%  Uncomment \acmBooktitle if the title of the proceedings is different
+%%  from ``Proceedings of ...''!
+%%
+%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%%  June 03--05, 2018, Woodstock, NY}
+% \acmISBN{978-1-4503-XXXX-X/2018/06}
+\acmConference{CSCI6806 Capstone Proj}{Fall 2025}{Vancouver, BC, CA}
+
+\settopmatter{printacmref=false} % removes the footnote below the first column
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes conference info footnote
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+% fix figure
+\usepackage{array}
+
+\usepackage{adjustbox}
+
+\usepackage[inkscapelatex=false]{svg}
+\svgsetup{inkscapelatex=false}
+
+\usepackage{graphicx}
+\usepackage{subcaption} % современная замена subfig
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{Group 1: Abstract, Introduction, and Conclusion}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+
+\author{Anna Gorislavets}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{a.gorislavets@student.fdu.edu}
+
+\author{Bikash Shyangtang}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{b.shyangtang@student.fdu.edu}
+
+\author{Hao Chen}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{h.chen4@student.fdu.edu}
+
+\author{Maoting Li}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{m.li3@student.fdu.edu}
+
+\author{Salinrat Thanathapsakun}
+\affiliation{%
+  \institution{Fairleigh Dickinson University}
+  \city{Vancouver}
+  \country{Canada}
+  }
+\email{s.thanathapsakun@student.fdu.edu}
+
+\vfill
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+% \renewcommand{\shortauthors}{Trovato et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+This work investigates the impact of varying key parameters in the Baleen flash caching system on performance. Baleen is a machine learning (ML)-based system that determines what data to store in flash memory for faster access and minimizing unnecessary writes. Three key parameters play an important role in the analysis of this work: Dynamic Threshold (\(\tau_{DT}\)), which represents a tunable threshold that dynamically adjusts caching admission or eviction based on data access patterns; the Protected Capacity (PROTECTED cap), which defines the fraction of cache space reserved for frequently reused data; and Alpha Time-To-Idle (\(\alpha_{tti}\)), which controls how quickly cached entries are considered inactive. This study examines these three parameters under two eviction policies: the Dynamic-Threshold Segmented Least Recently Used (DT-SLRU) and Eviction Decision Engine (EDE), in terms of their impact on system peak delay time (Peak DT) and cache efficiency (Hit Rate). The results demonstrated that the medium value of \(\tau_{DT}\) (namely, 0.001–0.01), for which maximum performance was obtained, led to an optimal delay time of 31.5~ms, with the hit rate as high as 2.25\%. Both other parameters, PROTECTED cap and \(\alpha_{tti}\), affect the system only slightly and help stabilize the system in all tested cases. Summing up, Baleen's ML-based strategy performs more efficiently and consistently than standard cache policies with less tuning, indicating that minimal tuning is enough to achieve stable and reliable results.
+
+
+\end{abstract}
+
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+% \begin{CCSXML}
+% <ccs2012>
+%  <concept>
+%   <concept_id>00000000.0000000.0000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>500</concept_significance>
+%  </concept>
+%  <concept>
+%   <concept_id>00000000.00000000.00000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>300</concept_significance>
+%  </concept>
+%  <concept>
+%   <concept_id>00000000.00000000.00000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>100</concept_significance>
+%  </concept>
+%  <concept>
+%   <concept_id>00000000.00000000.00000000</concept_id>
+%   <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
+%   <concept_significance>100</concept_significance>
+%  </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+% \ccsdesc[500]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+% \ccsdesc[300]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+% \ccsdesc{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+% \ccsdesc[100]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+% \keywords{Flash Cache, HDD throughput bottleneck, Disk-head Time (DT)}
+%% A "teaser" image appears between the author and affiliation
+%% information and the body of the document, and typically spans the
+%% page.
+% \begin{teaserfigure}
+%   \includegraphics[width=\textwidth]{sampleteaser}
+%   \caption{Seattle Mariners at Spring Training, 2010.}
+%   \Description{Enjoying the baseball game from the third-base
+%   seats. Ichiro Suzuki preparing to bat.}
+%   \label{fig:teaser}
+% \end{teaserfigure}
+
+% \received{20 February 2007}
+% \received[revised]{12 March 2009}
+% \received[accepted]{5 June 2009}
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+% \clearpage
+% \onecolumn make the document one column
+
+
+
+
+
+
+\clearpage
+%Abstract/Introduction/Conclusion
+
+
+\section{Introduction}
+Modern data centers are confronted with the challenges of managing the performance and cost of two types of storage devices: namely, hard drives (HDDs) that provide bulk storage capacity affordably at the expense of sacrificing efficiency, and solid-state drives (SSDs) to serve as flash cache to absorb peak I/O workloads that wear out quickly if used frequently. Flash cache is capable of improving the system performance significantly by reducing backend request latency; however, it also introduces additional challenges in device wearout optimization that traditional caching policies struggle to effectively address. The center of the problem arises due to the limited write endurance of SSDs, which makes caching every I/O miss indiscriminately infeasible because it would wear out SSDs too quickly and add significant additional cost to large datacenters. The limited write endurance of SSDs necessitates the implementation of admission and eviction policies that intelligently decide which memory block should be written to the flash cache to maximize performance while minimizing flash wearout and reducing backend load. 
+
+Recent research has offered valuable solutions to address this challenge. The Baleen article has illustrated that traditional cache admission and eviction policies, such as hit rate and byte miss rate, fail to capture the real cost of ownership of backend storage. It argues that this is especially true in large data centers. The authors proposed that DT, the time that a disk head spends serving backend requests, is in fact a more accurate measure for researchers to capture system performance in large data centers. 
+The Baleen article reveals that Peak DT is directly correlated with storage capacity requirements and long-term infrastructure costs. Thus, the minimization of Peak DT is crucial for performance optimization and cost reduction \cite{wong2024baleen}. Likewise, Kangaroo's work shows that conventional heuristic-based cache admission and eviction policies tend to make less than optimal decisions by prioritizing hit rates over system efficiency in the long run \cite{mcallister2021kangaroo}. This leads to under-utilization of system resources and increased operational costs in the long run. 
+
+Existing solutions that aim at optimizing flash caching often have significant limitations. Policies such as Least Recently Used (LRU) and First-In-First-Out (FIFO) evict memory blocks solely based on the order of arrival or recency. This kind of approach ignores the varying potential that each memory block has for system performance. Improved policies like RejectX resort to evaluating each memory block's characteristics on a case-by-case basis; however, RejectX relies on heuristics to make admission and eviction decisions, and therefore, it cannot adapt to varying backend workloads. 
+DT-SLRU represents an improvement from RejectX by the integration of service-time considerations; however, its decision-making is still based on heuristics and cannot predict a memory block's reusability reliably. Furthermore, both RejectX and DT-SLRU have a common limitation as both policies treat admission and evictions as two isolated events rather than an integrated segment which can be seen from the episode model in the Baleen article \cite{wong2024baleen}.
+
+The episode model introduced in the Baleen article treats each cache residency as a single unit (episode) that reflects the true cost of admission in the flash cache more precisely than the traditional metrics based on hit rates. The episode model recognizes periods of active access and idle periods to related memory blocks and makes a prediction on when items will become idle by understanding episode boundaries. Because of this, the episode model makes more informed decisions on which items to retain and which to evict. 
+Concretely, the implementation of the EDE eviction policy focuses on the following three areas. The first one is \(\tau_{DT}\), which admits a memory block only if the admitted block's service-time saving justifies the flash cache it consumes. The second is a PROTECTED cap, a protected segment that occupies a fixed fraction of the flash cache; the segment therefore prevents useful blocks from premature eviction during their reuse window. The last is the \(\alpha_{tti}\). By making the time-to-idle window adjustable, the protection of around a block naturally expires as the reuse likelihood diminishes. 
+Together, these three modifications align with Baleen's objective of minimizing Peak DT and reducing write amplification, which makes our approach different from earlier heuristics-based policies that focused on hit-rate maximization. With no less than 5 points and 3 runs per point (i.e., Admit-All, prefetch off, normalized reporting), the episode-based policy consistently demonstrates that it is capable of reducing service time and Peak DT when compared to the baseline. 
+
+Furthermore, flash writes are lowered while median latency remains unchanged across all experiments. Comparison between  E0 (LRU), E1(DT-SLRU), and E2 (EDE) was taken at the given cache size under Admit-All and Prefetch Disabled conditions, reporting Peak DT, median DT, and hit rate each with normalized values; here again, E2 always decreases Peak DT and latency while flash writes were also reduced. This suggests that paying close attention to blocks that have a high reuse potential is more worthwhile than focusing on the median across the entire cache residency. 
+
+The ablation study varied one parameter at a time: $\tau_{DT}$, the PROTECTED cap, and $\alpha_{\text{tti}}$. The results show that tightening $\tau_{DT}$ reduces flash-cache writes while keeping median latency unchanged. The PROTECTED cap has little impact on backend load for this workload, whereas a moderate $\alpha_{\text{tti}}$ value ($\approx 0.4$–$0.6$) provides the best balance, lowering Peak DT and tail latency without increasing write amplification.
+
+The project implemented an episode-aware eviction mechanism that treats cache residency as an episode with a deadline linked to $\tau_{DT}$, enabling evaluation of service-time reduction without modifying the core policy logic. The work also introduced a tail-aligned evaluation approach, focusing on Peak DT and service time rather than hit rate, and reporting results for E0 (LRU), E1 (DT-SLRU), and E2 (EDE). Normalized outcomes were presented to support consistent comparisons across different configurations. In addition, ablation-ready controls were developed by varying $\tau_{\text{DT}}$, PROTECTED cap, and $\alpha_{\text{tti}}$ to analyze each parameter's influence on eviction behavior. The results were documented through original figures containing five or more data points, with variance between runs accounted for under the fixed Admit-All and Prefetch-Disabled conditions.
+
+Each experiment was executed under identical runtime conditions to preserve reproducibility and consistency with the Baleen artifact methodology. Configuration logs and normalized outputs were retained to verify parameter sensitivity and ensure that observed variations stem solely from controlled changes in $\tau_{\text{DT}}$, PROTECTED cap, and $\alpha_{\text{tti}}$.
+
+\clearpage
+
+
+
+\section{Conclusion}
+The evaluation compared eviction policy behaviors within the Baleen-FAST'24 framework using the BCacheSim simulator. By systematically varying parameters such as $\tau_{\text{DT}}$, PROTECTED cap, and $\alpha_{\text{tti}}$, the analysis examined their effect on Peak DT, median DT, and cache hit rate. The results showed that $\tau_{\text{DT}}$ strongly influences the balance between admission filtering and flash utilization, while PROTECTED cap has a negligible impact under the EDE policy. The smoothing factor $\alpha_{\text{tti}}$ demonstrated mild sensitivity, confirming its role in stabilizing eviction behavior and improving temporal consistency. Across all configurations, both DT-SLRU and EDE maintained stable peak-latency trends, indicating robustness of Baleen's deadline-aware and episode-based architecture.
+
+Overall, the findings suggest that Baleen provides predictable performance even when internal tuning parameters vary substantially. The limited sensitivity observed for $\alpha_{\text{tti}}$ highlights opportunities for fine-grained latency optimization in dynamic workloads, while the general consistency across metrics confirms the effectiveness of Baleen's policy coordination. These results reflect a focused evaluation of isolated eviction components. Future extensions may include admission-prefetch interaction analysis, a wider range of workload types, and validation on real hardware systems to verify the observed trends under practical operating conditions.
+
+\clearpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Member Contributions}
+
+\subsection{Anna Gorislavets}
+
+\begin{itemize}
+    \item Wrote the Conclusion part of the paper.
+    \item Made the final formatting in the LaTeX.
+    \item Used Overleaf and GitHub for collaboration.
+    \item Ensured quality by cross-checking the information, aligning with the rubric requirements.
+    \item Participated in the final reading.
+\end{itemize}
+
+\subsection{Bikash Shyangtang}
+
+\begin{itemize}
+    \item Wrote the part of the Introduction.
+    \item Made the correct citations.
+    \item Use Overleaf for editing LaTeX.
+    \item Ensured quality by comparing content with source papers and validating technical clarity with peers.
+    \item Helped organize group editing sessions.
+\end{itemize}
+
+\subsection{Hao Chen}
+
+\begin{itemize}
+    \item Responsible for the part of the Introduction.
+    \item Create and format LaTeX templates, participated in literature review.
+    \item Overleaf for collaborative editing, and Notion for project management and task tracking.
+    \item Quality was ensured by reviewing the checklist from the grading rubric and proofreading the entire paper with everyone present at the Teams Meeting before submission.
+    \item Coordinated paper submission, used Notion to manage assignment progress and deadline, set up routine Zoom/Teams meetups.
+\end{itemize}
+
+\subsection{Maoting Li}
+
+\begin{itemize}
+    \item Wrote the part of the Introduction and curated this part of the paper.
+    \item Participated in the final LaTeX formatting.
+    \item Tools Used: Overleaf.
+    \item Verify the correctness of the conclusions.
+    \item Contributed to overall editing by reviewing group sections for consistency in writing style and formatting.
+\end{itemize}
+
+\subsection{Salinrat Thanathapsakun}
+
+\begin{itemize}
+    \item Responsible for the Abstract.
+    \item Ensured the abbreviations are correct across work.
+    \item Used Overleaf for LaTeX formatting and collaboration; reviewed outputs for figure interpretation.
+    \item Verified consistency between different parts of the paper.
+    \item Ensured consistent formatting according to ACM style guidelines.
+\end{itemize}
+\begin{comment}
+\section{Citations and Bibliographies}
+
+The use of \BibTeX\ for the preparation and formatting of one's
+references is strongly recommended. Authors' names should be complete
+--- use full first names (``Donald E. Knuth'') not initials
+(``D. E. Knuth'') --- and the salient identifying features of a
+reference should be included: title, year, volume, number, pages,
+article DOI, etc.
+
+The bibliography is included in your source document with these two
+commands, placed just before the \verb|\end{document}| command:
+\begin{verbatim}
+  \bibliographystyle{ACM-Reference-Format}
+  \bibliography{bibfile}
+\end{verbatim}
+where ``\verb|bibfile|'' is the name, without the ``\verb|.bib|''
+suffix, of the \BibTeX\ file.
+
+Citations and references are numbered by default. A small number of
+ACM publications have citations and references formatted in the
+``author year'' style; for these exceptions, please include this
+command in the {\bfseries preamble} (before the command
+``\verb|\begin{document}|'') of your \LaTeX\ source:
+\begin{verbatim}
+  \citestyle{acmauthoryear}
+\end{verbatim}
+
+
+  Some examples.  A paginated journal article \cite{Abril07}, an
+  enumerated journal article \cite{Cohen07}, a reference to an entire
+  issue \cite{JCohen96}, a monograph (whole book) \cite{Kosiur01}, a
+  monograph/whole book in a series (see 2a in spec. document)
+  \cite{Harel79}, a divisible-book such as an anthology or compilation
+  \cite{Editor00} followed by the same example, however we only output
+  the series if the volume number is given \cite{Editor00a} (so
+  Editor00a's series should NOT be present since it has no vol. no.),
+  a chapter in a divisible book \cite{Spector90}, a chapter in a
+  divisible book in a series \cite{Douglass98}, a multi-volume work as
+  book \cite{Knuth97}, a couple of articles in a proceedings (of a
+  conference, symposium, workshop for example) (paginated proceedings
+  article) \cite{Andler79, Hagerup1993}, a proceedings article with
+  all possible elements \cite{Smith10}, an example of an enumerated
+  proceedings article \cite{VanGundy07}, an informally published work
+  \cite{Harel78}, a couple of preprints \cite{Bornmann2019,
+    AnzarootPBM14}, a doctoral dissertation \cite{Clarkson85}, a
+  master's thesis: \cite{anisi03}, an online document / world wide web
+  resource \cite{Thornburg01, Ablamowicz07, Poker06}, a video game
+  (Case 1) \cite{Obama08} and (Case 2) \cite{Novak03} and \cite{Lee05}
+  and (Case 3) a patent \cite{JoeScientist001}, work accepted for
+  publication \cite{rous08}, 'YYYYb'-test for prolific author
+  \cite{SaeediMEJ10} and \cite{SaeediJETC10}. Other cites might
+  contain 'duplicate' DOI and URLs (some SIAM articles)
+  \cite{Kirschmer:2010:AEI:1958016.1958018}. Boris / Barbara Beeton:
+  multi-volume works as books \cite{MR781536} and \cite{MR781537}. A
+  presentation~\cite{Reiser2014}. An article under
+  review~\cite{Baggett2025}. A
+  couple of citations with DOIs:
+  \cite{2004:ITE:1009386.1010128,Kirschmer:2010:AEI:1958016.1958018}. Online
+  citations: \cite{TUGInstmem, Thornburg01, CTANacmart}.
+  Artifacts: \cite{R} and \cite{UMassCitations}.
+
+
+\end{comment}
+%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+% \nocite{song2020lrb} % this will cite everything in *.bib file
+%\citestyle{acmauthoryear}
+
+\citestyle{acmnumeric}
+\bibliographystyle{ACM-Reference-Format}
+%\bibliographystyle{IEEEtran}
+\clearpage
+% \onecolumn make the document one column
+\bibliography{ref}
+%\bibliography{sample-base}
+
+\clearpage
+
+%%
+%% If your work has an appendix, this is the place to put it.
+% \appendix
+
+% \section{Supplemental Material}
+
+% \begin{figure}[ht!]
+%   \centering
+%   \includesvg[width=0.40\textwidth]{a1_diagrams/CSCI6806_storage_stack.svg}
+%   \caption{Storage Architecture Diagram}
+%   \label{fig:2}
+% \end{figure}
+
+\end{document}
+\endinput
+%%
+%% End of file `sample-sigconf.tex'.
