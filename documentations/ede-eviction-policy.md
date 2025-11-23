@@ -97,3 +97,22 @@ EDE demonstrates superior performance compared to traditional policies
 4) EDE ensures perdictable performance:EDE has fixed protection capacity ensures stable cache behavior
 
 
+# Modiifications from the Original Baleen Design 
+
+1) Simplified Protection Logic
+
+The original approach treats protected items based on both DT-per-byte score AND time-to-idle threshold
+
+Our modiifcation treats protected items based on solely DT-per-byte score, reducing computational overhead
+
+2) Fixed Protected Capacity:
+
+The original Baleen approach formulates protected segments based on current cache utilization
+
+Our approach fixed protected segment size with strict capacity
+enforcement for predictable behavior
+
+3) Made alpha_atti configurable:  Configurable `alpha_tti` parameter allowing adaptive TTI prediction
+
+
+
