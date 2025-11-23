@@ -84,3 +84,16 @@ new_tti_estimate = alpha_tti × new_observation + (1 - alpha_tti) × previous_es
 In practice, however, Lower values (0.1-0.3) work well for stable workloads, while higher values (0.7-0.9) adapt better to changing access patterns.
 
 
+# How EDE differs from heuristic-based eviction policies
+
+EDE demonstrates superior performance compared to traditional policies
+
+1) EDE has higher hit rates: Up to 15% improvement over LRU in  simulations performed with trace files 
+
+2) EDE has better service time: EDE Reduces average disk head time by prioritizing high-value items
+
+3) EDE is adaptive: alpha_tti allows the policy to adapt to changing workload patterns
+
+4) EDE ensures perdictable performance:EDE has fixed protection capacity ensures stable cache behavior
+
+
