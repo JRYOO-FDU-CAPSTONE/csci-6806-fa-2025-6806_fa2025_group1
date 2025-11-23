@@ -69,3 +69,18 @@ alpha_tti = 1.0: TTI estimates adapt immediately to new observations (high respo
 alpha_tti = 0.1: TTI estimates change slowly, giving more weight to historical data (high stability, low responsiveness)
 
 alpha_atti = 0.5: Balanced approach between responsiveness and stability
+
+
+# How alpha_atti  works 
+
+Each time an item is accessed, EDE calculates a new TTI based on the current interarrival time
+
+The alpha_tti blends this new observation with the previous estimate:
+
+The formula is the following:
+
+new_tti_estimate = alpha_tti × new_observation + (1 - alpha_tti) × previous_estimate 
+
+In practice, however, Lower values (0.1-0.3) work well for stable workloads, while higher values (0.7-0.9) adapt better to changing access patterns.
+
+
