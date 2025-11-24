@@ -7,7 +7,7 @@ This document summarizes the CSCI6806 Capstone Project (Fall 2025), conducted at
 The project explores the evaluation and reproduction of the Baleen flash caching system proposed in "Baleen: ML Admission & Prefetching for Flash Caches" (USENIX FAST'24) - a system that optimizes flash cache usage in large-scale data centers by reducing peak backend load (Disk-head Time or DT) through ML–guided admission and prefetching.
 
 The document serves as an overview of the group's research and progress throughout the project.  
-It connects all submitted assignments (A1-A5) into a cohesive narrative that reflects both the theoretical foundation and the practical methodology of our work.
+It connects all submitted assignments (A1-A6) into a cohesive narrative that reflects both the theoretical foundation and the practical methodology of our work.
 
 ---
 
