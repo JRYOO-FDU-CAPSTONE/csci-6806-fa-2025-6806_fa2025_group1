@@ -96,7 +96,21 @@ These results support the paper's claim that Baleen's performance does not depen
 
 ---
 
-## 8. Project Timeline
+## 8. Abstract, Introduction, and Conclusion (A6)
+
+The sixth stage focused on writing the Abstract, Introduction, and Conclusion for the capstone report.
+This assignment consolidated our understanding of Baleen and required presenting the problem, motivation, prior solutions, Baleen's design, and the project's contributions in an academic form.
+
+Work completed during this assignment:
+- The Abstract summarized the goal of evaluating Baleen's key parameters (𝜏DT, PROTECTED cap, 𝛼tti) and highlighted the main quantitative findings from A4-A5;
+- The Introduction explained the limitations of traditional caching policies, the motivation for using DT as a backend-load metric, and how Baleen's episode model and ML-based approach address these issues;
+- The Conclusion summarized the experimental results, emphasizing Baleen's robustness, low parameter sensitivity, and predictable performance.
+
+This stage translated the technical findings from A1-A5 into polished academic writing aligned with FAST'24 style expectations.
+
+---
+
+## 9. Project Timeline
 
 | Assignment | Focus | Summary of Work |
 |-----------|--------|------------------|
@@ -105,3 +119,4 @@ These results support the paper's claim that Baleen's performance does not depen
 | A3 | Methodology | Analyzed the Baleen-FAST24 artifact, experiment structure, and key performance metrics |
 | A4 | Evaluation | Interpreted Baleen vs. baseline results (Peak DT, Median DT, hit rate, flash write rate) |
 | A5 | Ablation Study | Evaluated parameter sensitivity (𝜏DT, PROTECTED cap, 𝛼tti) |
+| A6 | Abstract, Introduction, and Conclusion | Summarized our work in Abstract, Introduction, and Conclusion sections for the final report |
