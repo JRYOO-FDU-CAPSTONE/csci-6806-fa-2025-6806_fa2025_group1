@@ -69,3 +69,77 @@ alpha_tti = 1.0: TTI estimates adapt immediately to new observations (high respo
 alpha_tti = 0.1: TTI estimates change slowly, giving more weight to historical data (high stability, low responsiveness)
 
 alpha_atti = 0.5: Balanced approach between responsiveness and stability
+
+
+# How alpha_atti  works 
+
+Each time an item is accessed, EDE calculates a new TTI based on the current interarrival time
+
+The alpha_tti blends this new observation with the previous estimate:
+
+The formula is the following:
+
+new_tti_estimate = alpha_tti × new_observation + (1 - alpha_tti) × previous_estimate 
+
+In practice, however, Lower values (0.1-0.3) work well for stable workloads, while higher values (0.7-0.9) adapt better to changing access patterns.
+
+
+# How EDE differs from heuristic-based eviction policies
+
+EDE demonstrates superior performance compared to traditional policies
+
+1) EDE has higher hit rates: Up to 15% improvement over LRU in  simulations performed with trace files 
+
+2) EDE has better service time: EDE Reduces average disk head time by prioritizing high-value items
+
+3) EDE is adaptive: alpha_tti allows the policy to adapt to changing workload patterns
+
+4) EDE ensures perdictable performance:EDE has fixed protection capacity ensures stable cache behavior
+
+
+# Modiifications from the Original Baleen Design 
+
+1) Simplified Protection Logic
+
+The original approach treats protected items based on both DT-per-byte score AND time-to-idle threshold
+
+Our modiifcation treats protected items based on solely DT-per-byte score, reducing computational overhead
+
+2) Fixed Protected Capacity:
+
+The original Baleen approach formulates protected segments based on current cache utilization
+
+Our approach fixed protected segment size with strict capacity
+enforcement for predictable behavior
+
+3) Made alpha_atti configurable:  Configurable `alpha_tti` parameter allowing adaptive TTI prediction
+
+
+	# Usage Example 
+
+	```bash
+# Basic EDE simulation
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
+
+# EDE with custom protected capacity (0.1 to 0.9)
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-protected-cap 0.5
+
+# EDE with custom EWMA smoothing factor
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-alpha-tti 0.3
+```
+
+	# Conclusion 
+
+
+EDE reframes cache residency as an **episode with a deadline**, 
+letting the policy prioritize objects by their predicted impact on disk-head time (DT) rather than static recency/frequency rules. 
+In our experiments, three controls shape behavior:
+
+
+	- **DT-per-byte threshold** sets urgency and directly tracks backend pressure.
+- **α_tti ** dampens burstiness; moderate values improved stability without masking sustained demand.
+- **Protected-cap** offers limited gains on this workload, as deadline-driven selection dominates partitioning decisions.
+
+Compared to heuristic baselines , EDE  adapts to workload structure, and reduces Peak DT at comparable or lower flash writes.
+ The trade-off is a need for reliable signals (DT metrics, admission features).  
+
