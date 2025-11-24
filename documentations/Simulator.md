@@ -19,3 +19,7 @@ Ml-Guided pilicies is an approach made for efficient cache management using mach
 For this ML approach episode based model is used which treats each cache residency as a single logical unit instead of whole individual block of data. It is very useful for Ml model to learn the patterns about access sequence and make decision for optimizing the episode lifecycle. Being based on these ML model is implemented by simulator which predict which block are likely to be accessed in future which enable proactive admission of data before it is requested.
 
 The Ml guided approach is advantageous over traditional policies. It learns complex. non linear relationships between different patterns which helps to make optimal decision for caching and helps to achieve better performance.
+
+# Episode Based Model
+
+Episode based Model are essential part of this experiment, they treat group of cache residency as a single logical unit in place of single data blocks which is integral part of Baleen's approach for optimizing performance. An episode is a representation of sequence of accesses of data block which forms a logical unit and is essential for cache management decision. These episode based-approach in this experiment enables simulator to make more intelligent caching decisions which take consideration of both performance and flash endurance limitation to make better overall system.
