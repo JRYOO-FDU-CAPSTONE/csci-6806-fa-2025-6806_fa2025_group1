@@ -127,3 +127,13 @@ enforcement for predictable behavior
 # EDE with custom EWMA smoothing factor
 ./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-alpha-tti 0.3
 ```
+
+	# Conclusion 
+
+
+EDE reframes cache residency as an **episode with a deadline**, 
+letting the policy prioritize objects by their predicted impact on disk-head time (DT) rather than static recency/frequency rules. 
+In our experiments, three controls shape behavior:
+
+
+
