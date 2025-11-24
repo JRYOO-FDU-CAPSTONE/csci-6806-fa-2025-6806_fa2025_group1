@@ -136,4 +136,10 @@ letting the policy prioritize objects by their predicted impact on disk-head tim
 In our experiments, three controls shape behavior:
 
 
+	- **DT-per-byte threshold** sets urgency and directly tracks backend pressure.
+- **α_tti ** dampens burstiness; moderate values improved stability without masking sustained demand.
+- **Protected-cap** offers limited gains on this workload, as deadline-driven selection dominates partitioning decisions.
+
+Compared to heuristic baselines , EDE  adapts to workload structure, and reduces Peak DT at comparable or lower flash writes.
+ The trade-off is a need for reliable signals (DT metrics, admission features).  
 
