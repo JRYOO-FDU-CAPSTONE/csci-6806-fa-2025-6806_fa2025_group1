@@ -137,3 +137,15 @@ A9 marks the completion of the project by unifying all technical and analytical 
 | A5 | Ablation Study | Evaluated parameter sensitivity (𝜏DT, PROTECTED cap, 𝛼tti) |
 | A6 | Abstract, Introduction, and Conclusion | Summarized our work in Abstract, Introduction, and Conclusion sections for the final report |
 | A9 | Final Report | Combined all sections into a unified report, added Discussion, refined formatting |
+
+---
+
+## 11. Future Work
+
+Although the core evaluation and ablation studies have been completed, several directions remain open for future exploration:
+- Extend experiments to additional Tectonic regions and other real-world traces to evaluate Baleen's generality across diverse access patterns;
+- Retrain the ML admission model using different flash write-rate budgets to analyze trade-offs between endurance and performance;
+- Conduct an expanded study on how prefetching decisions influence episode generation, OPT labels, and final DT outcomes;
+- Evaluate Baleen under a wider range of flash cache sizes to better understand scalability limits;
+- Explore practical integration aspects, such as burst behavior, warm-up effects, and the cost of retraining under workload shifts;
+- Combine the simulator with a database or key-value store emulator to measure application-level tail latency improvements.
