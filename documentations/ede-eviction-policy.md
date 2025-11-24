@@ -115,4 +115,31 @@ enforcement for predictable behavior
 3) Made alpha_atti configurable:  Configurable `alpha_tti` parameter allowing adaptive TTI prediction
 
 
+	# Usage Example 
+
+	```bash
+# Basic EDE simulation
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
+
+# EDE with custom protected capacity (0.1 to 0.9)
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-protected-cap 0.5
+
+# EDE with custom EWMA smoothing factor
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-alpha-tti 0.3
+```
+
+	# Conclusion 
+
+
+EDE reframes cache residency as an **episode with a deadline**, 
+letting the policy prioritize objects by their predicted impact on disk-head time (DT) rather than static recency/frequency rules. 
+In our experiments, three controls shape behavior:
+
+
+	- **DT-per-byte threshold** sets urgency and directly tracks backend pressure.
+- **α_tti ** dampens burstiness; moderate values improved stability without masking sustained demand.
+- **Protected-cap** offers limited gains on this workload, as deadline-driven selection dominates partitioning decisions.
+
+Compared to heuristic baselines , EDE  adapts to workload structure, and reduces Peak DT at comparable or lower flash writes.
+ The trade-off is a need for reliable signals (DT metrics, admission features).  
 
