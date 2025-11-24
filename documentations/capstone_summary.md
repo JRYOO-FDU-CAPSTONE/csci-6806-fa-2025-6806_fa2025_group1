@@ -7,7 +7,7 @@ This document summarizes the CSCI6806 Capstone Project (Fall 2025), conducted at
 The project explores the evaluation and reproduction of the Baleen flash caching system proposed in "Baleen: ML Admission & Prefetching for Flash Caches" (USENIX FAST'24) - a system that optimizes flash cache usage in large-scale data centers by reducing peak backend load (Disk-head Time or DT) through ML–guided admission and prefetching.
 
 The document serves as an overview of the group's research and progress throughout the project.  
-It connects all submitted assignments (A1-A5) into a cohesive narrative that reflects both the theoretical foundation and the practical methodology of our work.
+It connects all submitted assignments (A1-A6) into a cohesive narrative that reflects both the theoretical foundation and the practical methodology of our work.
 
 ---
 
@@ -96,7 +96,37 @@ These results support the paper's claim that Baleen's performance does not depen
 
 ---
 
-## 8. Project Timeline
+## 8. Abstract, Introduction, and Conclusion (A6)
+
+The sixth stage focused on writing the Abstract, Introduction, and Conclusion for the capstone report.
+This assignment consolidated our understanding of Baleen and required presenting the problem, motivation, prior solutions, Baleen's design, and the project's contributions in an academic form.
+
+Work completed during this assignment:
+- The Abstract summarized the goal of evaluating Baleen's key parameters (𝜏DT, PROTECTED cap, 𝛼tti) and highlighted the main quantitative findings from A4-A5;
+- The Introduction explained the limitations of traditional caching policies, the motivation for using DT as a backend-load metric, and how Baleen's episode model and ML-based approach address these issues;
+- The Conclusion summarized the experimental results, emphasizing Baleen's robustness, low parameter sensitivity, and predictable performance.
+
+This stage translated the technical findings from A1-A5 into polished academic writing aligned with FAST'24 style expectations.
+
+---
+
+## 9. Final Report (A9)
+
+The last stage focused on assembling the complete final report, combining all major sections: Abstract, Introduction, Background, Related Work, Methodology, Evaluation, Discussion, Ablation Study, Conclusion, Member Contributions, and References.
+
+Work completed during this stage:
+- Integrated all prior assignments (A1-A6) into a single coherent document;
+- Rewrote transitional parts to ensure flow, removed redundancy, and aligned terminology across sections;
+- Added the Discussion, highlighting the importance of Peak DT, the significance of Baleen's robustness, and future extensions such as broader workloads, admission-prefetch interactions, and real-system validation;
+- Organized the Ablation Study as a standalone section in the full paper, with clearer motivation and analytical framing;
+- Ensured ACM-style formatting, citation consistency, and figure alignment;
+- Finalized Member Contributions and References per course requirements.
+
+A9 marks the completion of the project by unifying all technical and analytical work into the final, publication-ready report.
+
+---
+
+## 10. Project Timeline
 
 | Assignment | Focus | Summary of Work |
 |-----------|--------|------------------|
@@ -105,3 +135,17 @@ These results support the paper's claim that Baleen's performance does not depen
 | A3 | Methodology | Analyzed the Baleen-FAST24 artifact, experiment structure, and key performance metrics |
 | A4 | Evaluation | Interpreted Baleen vs. baseline results (Peak DT, Median DT, hit rate, flash write rate) |
 | A5 | Ablation Study | Evaluated parameter sensitivity (𝜏DT, PROTECTED cap, 𝛼tti) |
+| A6 | Abstract, Introduction, and Conclusion | Summarized our work in Abstract, Introduction, and Conclusion sections for the final report |
+| A9 | Final Report | Combined all sections into a unified report, added Discussion, refined formatting |
+
+---
+
+## 11. Future Work
+
+Although the core evaluation and ablation studies have been completed, several directions remain open for future exploration:
+- Extend experiments to additional Tectonic regions and other real-world traces to evaluate Baleen's generality across diverse access patterns;
+- Retrain the ML admission model using different flash write-rate budgets to analyze trade-offs between endurance and performance;
+- Conduct an expanded study on how prefetching decisions influence episode generation, OPT labels, and final DT outcomes;
+- Evaluate Baleen under a wider range of flash cache sizes to better understand scalability limits;
+- Explore practical integration aspects, such as burst behavior, warm-up effects, and the cost of retraining under workload shifts;
+- Combine the simulator with a database or key-value store emulator to measure application-level tail latency improvements.
