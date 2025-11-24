@@ -23,3 +23,7 @@ The Ml guided approach is advantageous over traditional policies. It learns comp
 # Episode Based Model
 
 Episode based Model are essential part of this experiment, they treat group of cache residency as a single logical unit in place of single data blocks which is integral part of Baleen's approach for optimizing performance. An episode is a representation of sequence of accesses of data block which forms a logical unit and is essential for cache management decision. These episode based-approach in this experiment enables simulator to make more intelligent caching decisions which take consideration of both performance and flash endurance limitation to make better overall system.
+
+# LRU Eviction Policy
+
+Baseline Eviction policy used in this paper is LRU which stands for Least Recently used. It is simply the eviction policy which removes the item from cache which is not accessed from the longest period of time. The Baseline LRU principle is that when more cache space is needed in cache system, LRU evict the block of data which is least accessed keeping the most recently accessed item. It has several benefit in BCacheSim such as simple and fast implementation, predictable performance and low memory overhead.
