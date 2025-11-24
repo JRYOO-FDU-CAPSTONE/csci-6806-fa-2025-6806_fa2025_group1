@@ -115,4 +115,15 @@ enforcement for predictable behavior
 3) Made alpha_atti configurable:  Configurable `alpha_tti` parameter allowing adaptive TTI prediction
 
 
+	# Usage Example 
 
+	```bash
+# Basic EDE simulation
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json
+
+# EDE with custom protected capacity (0.1 to 0.9)
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-protected-cap 0.5
+
+# EDE with custom EWMA smoothing factor
+./BCacheSim/run_py.sh py -B -m BCacheSim.cachesim.simulate_ap --config runs/example/ede/config.json --ede-alpha-tti 0.3
+```
