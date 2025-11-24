@@ -191,6 +191,16 @@ else:
 3. **No Cost Awareness**: Doesn't consider the cost of re-fetching evicted items
 4. **Scan Resistance**: Vulnerable to sequential access patterns that can pollute the cache
 
+## Comparison with Other Policies
+
+BCacheSim implements several eviction policies that extend or replace the basic LRU:
+
+1. **TTL Policy**: Adds time-to-live expiration
+2. **DT-SLRU**: Segmented LRU with service-time awareness
+3. **EDE**: Episode-deadline eviction with predictive capabilities
+4. **LIRS**: Low Inter-reference Recency Set for improved scan resistance
+
+The LRU policy serves as the foundation and baseline against which these more sophisticated policies are compared.
 
 
 These metrics are collected and reported through the [`StatsDumper`](BCacheSim/cachesim/sim_cache.py:46) class for performance analysis.
