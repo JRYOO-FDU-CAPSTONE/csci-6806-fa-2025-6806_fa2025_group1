@@ -110,7 +110,23 @@ This stage translated the technical findings from A1-A5 into polished academic w
 
 ---
 
-## 9. Project Timeline
+## 9. Final Report (A9)
+
+The last stage focused on assembling the complete final report, combining all major sections: Abstract, Introduction, Background, Related Work, Methodology, Evaluation, Discussion, Ablation Study, Conclusion, Member Contributions, and References.
+
+Work completed during this stage:
+- Integrated all prior assignments (A1-A6) into a single coherent document;
+- Rewrote transitional parts to ensure flow, removed redundancy, and aligned terminology across sections;
+- Added the Discussion, highlighting the importance of Peak DT, the significance of Baleen's robustness, and future extensions such as broader workloads, admission-prefetch interactions, and real-system validation;
+- Organized the Ablation Study as a standalone section in the full paper, with clearer motivation and analytical framing;
+- Ensured ACM-style formatting, citation consistency, and figure alignment;
+- Finalized Member Contributions and References per course requirements.
+
+A9 marks the completion of the project by unifying all technical and analytical work into the final, publication-ready report.
+
+---
+
+## 10. Project Timeline
 
 | Assignment | Focus | Summary of Work |
 |-----------|--------|------------------|
@@ -120,3 +136,4 @@ This stage translated the technical findings from A1-A5 into polished academic w
 | A4 | Evaluation | Interpreted Baleen vs. baseline results (Peak DT, Median DT, hit rate, flash write rate) |
 | A5 | Ablation Study | Evaluated parameter sensitivity (𝜏DT, PROTECTED cap, 𝛼tti) |
 | A6 | Abstract, Introduction, and Conclusion | Summarized our work in Abstract, Introduction, and Conclusion sections for the final report |
+| A9 | Final Report | Combined all sections into a unified report, added Discussion, refined formatting |
