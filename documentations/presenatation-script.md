@@ -28,3 +28,14 @@ Beyond 0.01, performance plateaus as the threshold becomes too conservative.
 
 
 The curve shows dramatic non-linear behavior, which means this parameter requires careful tuning for optimal performance.
+
+
+# Protected Cap Sensitivity
+
+The PROTECTED cap parameter controls how much of the cache is reserved for protected segments.
+
+Our results show this has minimal impact on the EDE policy—performance remains relatively flat across different values. 
+
+This suggests that EDE's eviction strategy is robust to this particular configuration.
+
+
