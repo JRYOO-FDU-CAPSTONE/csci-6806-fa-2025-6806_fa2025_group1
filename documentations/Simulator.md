@@ -12,13 +12,17 @@ Disk-Head time is defined as time a disk spend on fulfilling the request on back
 
 In this BcacheSim simulator, DT is used as main parameter which is taken in account for all admission and eviction policies which aims for the minimum Peak DT instead of only maximizing hit rates. Simulator is used to observe the peak DT over different parameters so it can be analyzed properly and which can help in the study of different cache policies and their impact.
 
-# ML-Guided Policies
+# ML-Guided Addmission Policy
 
-Ml-Guided pilicies is an approach made for efficient cache management using machine learning to make proper addmission and prefeteching decision to reduce Peak DT. It is very different from tradition heuristic based policies which is based on fixed threshold or rules, these Ml-guided policies are trained on episode based features to predict whether to admit the particular episode or exclude the episode so it can benefit the flash write cost. The ML-guided training is based on optimal addmission Policy (OPT) which can make addmission decisions and train ML models to utilize that optimal decision maintaing flash write constraints. 
+Ml-Guided addmission policy is an approach made for efficient cache management using machine learning to make proper addmission and prefeteching decision to reduce Peak DT. It is very different from tradition heuristic based policies which is based on fixed threshold or rules, these Ml-guided policies are trained on episode based features to predict whether to admit the particular episode or exclude the episode so it can benefit the flash write cost. The ML-guided training is based on optimal addmission Policy (OPT) which can make addmission decisions and train ML models to utilize that optimal decision maintaing flash write constraints. 
 
 For this ML approach episode based model is used which treats each cache residency as a single logical unit instead of whole individual block of data. It is very useful for Ml model to learn the patterns about access sequence and make decision for optimizing the episode lifecycle. Being based on these ML model is implemented by simulator which predict which block are likely to be accessed in future which enable proactive admission of data before it is requested.
 
 The Ml guided approach is advantageous over traditional policies. It learns complex. non linear relationships between different patterns which helps to make optimal decision for caching and helps to achieve better performance.
+
+# ML-Guided Prefetching
+
+For prefetching purpose this research uses machine learning method. It uses machine learning models to predict which data chunks should be prefetched when a cache miss occurs. It is divided into two parts What to prefetch and When to prefetch. In the case of a cache miss, the system relies on trained ML models to predict the chunks, in an episode, that should be pre-fetched based on episode attributes such as access patterns, type of operation, user details and past access history. Offline training of the ML models is performed on features based on the episode accesses to predict the ranges of episode that cannot be identified by simple heuristics. The prefetching is coordinated to the ML admission policy, whereby the prefetched data is admission criteria and offers net service time benefits. ML-guided prefetching using Baleen forecasts the best prefetch range in episodes and uses confidence-based filtering to achieve greater backend load reduction in comparison with traditional methods, which contributes to the overall 12% peak improvement in DT and 17% TCO improvements in the system.
 
 # Episode Based Model
 
