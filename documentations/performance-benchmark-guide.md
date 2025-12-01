@@ -35,6 +35,16 @@ For comprehensive evaluation, test these parameter ranges:
    - Importance: Indicates typical system performance
    - Collection: Reported in simulation output
 
+	
+## Best Practices
+
+1. **Start Small**: Begin with small trace samples to validate setup
+2. **Document Everything**: Keep detailed logs of all experiments
+3. **Version Control**: Track code and configuration changes
+4. **Automate**: Use scripts for repetitive tasks
+5. **Validate**: Cross-check results with known baselines
+6. **Share**: Make data and analysis scripts available
+
 3. **Hit Rate**
    - Definition: Percentage of requests served from cache
    - Importance: Traditional cache performance metric
