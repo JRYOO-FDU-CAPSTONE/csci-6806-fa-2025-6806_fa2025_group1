@@ -22,4 +22,36 @@ For comprehensive evaluation, test these parameter ranges:
 | `alpha_tti` | 0.1 - 0.9 | 0.1 | Linear steps |
 
 
+## Key Metrics Collections
+		
+
+1. **Peak Disk Head Time (Peak DT)**
+   - Definition: Maximum disk head time across all time windows
+   - Importance: Directly correlates with storage capacity requirements
+   - Collection: Automatically calculated by simulator
+
+2. **Median Disk Head Time (Median DT)**
+   - Definition: 50th percentile of disk head time distribution
+   - Importance: Indicates typical system performance
+   - Collection: Reported in simulation output
+
+3. **Hit Rate**
+   - Definition: Percentage of requests served from cache
+   - Importance: Traditional cache performance metric
+   - Collection: Available in simulation statistics
+
+### Secondary Metric
+
+
+	4. **Byte Hit Rate**
+   - Definition: Percentage of bytes served from cache
+   - Importance: Indicates cache efficiency for large objects
+
+5. **Average Response Time**
+   - Definition: Mean response time across all requests
+   - Importance: End-to-end performance impact
+
+6. **Cache Utilization**
+   - Definition: Percentage of cache capacity utilized
+   - Importance: Resource efficiency metric
 
